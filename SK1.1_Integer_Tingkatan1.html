@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Ekspedisi Integer — Dari Puncak ke Palung | SK 1.1</title>
+<style>
+  :root{
+    --bg: #0d1b2a;
+    --bg-alt: #14283a;
+    --surface: #1b3448;
+    --surface-2: #223f56;
+    --border: #2c4d63;
+    --text: #eaf6f6;
+    --muted: #9fb8c3;
+    --positive: #2dd4bf;
+    --positive-dark: #16867a;
+    --negative: #f97362;
+    --negative-dark: #b8402f;
+    --gold: #f4b942;
+    --danger: #ef4444;
+    --radius: 14px;
+    --maxw: 560px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: radial-gradient(ellipse at top, #17324a 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+    display:flex;
+    justify-content:center;
+    line-height:1.5;
+  }
+  #app{
+    width:100%;
+    max-width: var(--maxw);
+    min-height:100vh;
+    padding: 18px 18px 40px;
+    position:relative;
+  }
+  h1,h2,h3{ margin:0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+  h1{ font-size:1.5rem; }
+  h2{ font-size:1.2rem; }
+  h3{ font-size:1.02rem; }
+  p{ margin:0 0 12px; color: var(--text); }
+  .muted{ color: var(--muted); font-size:0.9rem; }
+  .card{
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .pill{
+    display:inline-block;
+    padding:3px 10px;
+    border-radius:999px;
+    font-size:0.72rem;
+    font-weight:700;
+    letter-spacing:0.02em;
+    background: var(--surface-2);
+    color: var(--gold);
+    border:1px solid var(--border);
+  }
+  .btn{
+    display:block;
+    width:100%;
+    padding:14px 16px;
+    border-radius: 12px;
+    border:none;
+    font-size:1rem;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:10px;
+    transition: transform .08s ease, opacity .15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active{ transform: scale(0.98); }
+  .btn-primary{ background: var(--positive); color:#04241f; }
+  .btn-primary:disabled{ opacity:0.4; cursor:not-allowed; }
+  .btn-ghost{ background: transparent; color: var(--muted); border:1px solid var(--border); }
+  .btn-gold{ background: var(--gold); color:#3a2600; }
+  .btn-option{
+    display:block; width:100%; text-align:left;
+    background: var(--surface-2); color: var(--text);
+    border:1px solid var(--border); border-radius:12px;
+    padding:13px 14px; margin-top:9px; font-size:0.98rem; cursor:pointer;
+  }
+  .btn-option:active{ transform: scale(0.99); }
+  .btn-option.correct{ background: var(--positive-dark); border-color: var(--positive); }
+  .btn-option.wrong{ background: var(--negative-dark); border-color: var(--negative); }
+  .btn-option.disabled{ pointer-events:none; opacity:0.85; }
+  input[type=text]{
+    width:100%; padding:13px 14px; border-radius:12px;
+    border:1px solid var(--border); background: var(--surface-2);
+    color: var(--text); font-size:1rem; margin-bottom:6px;
+  }
+  label{ font-size:0.85rem; color: var(--muted); display:block; margin-bottom:5px; margin-top:10px; }
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:14px; gap:10px;
+  }
+  .topbar .back{
+    background:none; border:none; color: var(--muted); font-size:0.95rem;
+    cursor:pointer; padding:6px 0; display:flex; align-items:center; gap:4px;
+  }
+  .progressbar{
+    width:100%; height:8px; background: var(--surface-2);
+    border-radius:999px; overflow:hidden; margin: 8px 0 16px;
+  }
+  .progressbar > div{ height:100%; background: linear-gradient(90deg, var(--positive), var(--gold)); }
+  .databox{
+    background: var(--bg-alt); border-left:4px solid var(--gold);
+    border-radius:8px; padding:12px 14px; margin:10px 0; font-size:0.95rem;
+  }
+  .databox.neg{ border-left-color: var(--negative); }
+  .databox.pos{ border-left-color: var(--positive); }
+  .feedback{
+    border-radius:10px; padding:12px 14px; margin-top:10px; font-size:0.92rem; font-weight:600;
+  }
+  .feedback.ok{ background: rgba(45,212,191,0.15); color: var(--positive); border:1px solid var(--positive); }
+  .feedback.no{ background: rgba(249,115,98,0.15); color: var(--negative); border:1px solid var(--negative); }
+  .hint-box{
+    background: var(--surface-2); border:1px dashed var(--gold);
+    border-radius:10px; padding:10px 12px; margin-top:8px; font-size:0.88rem; color: var(--gold);
+  }
+  .badge-level{
+    display:inline-block; font-size:0.68rem; font-weight:800; letter-spacing:0.03em;
+    padding:2px 8px; border-radius:6px; margin-bottom:8px;
+  }
+  .lvl-rendah{ background:#264d3a; color:#7be0a8; }
+  .lvl-sederhana{ background:#2a4763; color:#7fc4f7; }
+  .lvl-tinggi{ background:#5a3a1f; color:#f7b563; }
+  .lvl-kbat{ background:#4a2338; color:#f78fc0; }
+  .statrow{ display:flex; gap:10px; margin-bottom:14px; }
+  .statbox{
+    flex:1; background: var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:10px; text-align:center;
+  }
+  .statbox .num{ font-size:1.3rem; font-weight:800; color: var(--gold); }
+  .statbox .lbl{ font-size:0.7rem; color: var(--muted); }
+  .scorelist{ max-height:340px; overflow-y:auto; border:1px solid var(--border); border-radius:12px; }
+  .scoreitem{ padding:10px 12px; border-bottom:1px solid var(--border); font-size:0.85rem; }
+  .scoreitem:last-child{ border-bottom:none; }
+  .scoreitem .ok-tag{ color: var(--positive); font-weight:700; }
+  .scoreitem .no-tag{ color: var(--negative); font-weight:700; }
+  .version-badge{
+    position:absolute; top:10px; right:10px; font-size:0.62rem;
+    background: var(--surface-2); color: var(--muted); border:1px solid var(--border);
+    padding:3px 7px; border-radius:6px; letter-spacing:0.02em;
+  }
+  .numline-wrap{ overflow-x:auto; padding:6px 0 10px; }
+  svg text{ font-family: inherit; user-select:none; }
+  .tick-btn{ cursor:pointer; }
+  .tick-btn circle{ transition: fill .1s ease; }
+  .module-row{
+    display:flex; align-items:center; justify-content:space-between;
+    background: var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:13px 14px; margin-bottom:10px; cursor:pointer;
+  }
+  .module-row.locked{ opacity:0.45; cursor:not-allowed; }
+  .module-row .check{ font-size:1.1rem; }
+  .footer-note{ text-align:center; font-size:0.72rem; color: var(--muted); margin-top:24px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* =========================================================
+   EKSPEDISI INTEGER — Dari Puncak ke Palung
+   SK 1.1 Integer | KSSM Matematik Tingkatan 1
+   VERSI v1.0
+   ========================================================= */
+
+const VERSION = "v1.0";
+const STORAGE_KEY = "ekspedisi_integer_sk11_state";
+
+/* ---------- STATE (merge, bukan replace) ---------- */
+function freshState(){
+  return {
+    path: ["welcome"],
+    name: "",
+    kelas: "",
+    startTime: null,
+    endTime: null,
+    diagLog: [],
+    practiceLog: [],
+    bankLog: [],
+    exitLog: [],
+    moduleDone: { A:false, B:false, C:false, D:false },
+    moduleIndex: 0,
+    qIndex: 0,
+    hintsUsedTotal: 0,
+    version: VERSION
+  };
+}
+
+let state = loadState();
+
+function loadState(){
+  try{
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if(!saved) return freshState();
+    return Object.assign(freshState(), JSON.parse(saved));
+  }catch(e){
+    return freshState();
+  }
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e){ /* storan tidak tersedia, teruskan tanpa simpan */ }
+}
+
+/* ---------- NAVIGASI DALAMAN (bukan History API) ---------- */
+function goTo(screen, resetSub){
+  if(resetSub){ state.qIndex = 0; }
+  state.path.push(screen);
+  saveState();
+  render();
+}
+function goBack(){
+  if(state.path.length > 1){ state.path.pop(); }
+  saveState();
+  render();
+}
+function currentScreen(){ return state.path[state.path.length - 1]; }
+
+/* ---------- DATA SOALAN ---------- */
+
+// Modul A — 1.1.1 Kenal positif & negatif drpd situasi sebenar
+const modA = [
+  {
+    id:"A1",
+    stem:"Suhu peti sejuk ialah 18 darjah Celsius DI BAWAH takat beku (0°C). Bagaimana suhu ini diwakilkan sebagai integer?",
+    options:["+18°C","−18°C","18°C sahaja (tiada tanda)","0°C"],
+    correct:1,
+    explain:"Di bawah takat sifar diwakili dengan tanda negatif, jadi suhunya ialah −18°C."
+  },
+  {
+    id:"A2",
+    stem:"Sebuah bangunan di Kota Bharu mempunyai tempat letak kereta di Aras Bawah Tanah 2 (B2) dan pejabat di Aras 5. Jika Aras 1 (paras jalan) = 0, integer manakah mewakili B2?",
+    options:["+2","−2","+5","−5"],
+    correct:1,
+    explain:"B2 berada 2 tingkat DI BAWAH paras jalan, jadi diwakili −2."
+  },
+  {
+    id:"A3",
+    stem:"Seorang peniaga pasar malam untung RM45 pada hari Jumaat, tetapi rugi RM20 pada hari Sabtu. Integer bagi keadaan hari Sabtu ialah:",
+    options:["+45","+20","−20","−45"],
+    correct:2,
+    explain:"Rugi diwakili dengan tanda negatif: −20 (RM)."
+  }
+];
+
+// Modul B — 1.1.2 Kenal & perihal integer
+const modB = [
+  {
+    id:"B1",
+    stem:"Yang manakah antara berikut ADALAH integer?",
+    options:["−7","3.5","½","2.75"],
+    correct:0,
+    explain:"Integer ialah nombor bulat positif, nombor bulat negatif, atau sifar — tiada pecahan/perpuluhan. −7 ialah integer."
+  },
+  {
+    id:"B2",
+    stem:"Yang manakah BUKAN integer?",
+    options:["0","−100","6","−3.2"],
+    correct:3,
+    explain:"−3.2 ialah perpuluhan, bukan nombor bulat, jadi bukan integer."
+  },
+  {
+    id:"B3",
+    stem:"Nombor 0 (sifar) — pilih penerangan yang PALING tepat:",
+    options:[
+      "0 ialah integer positif",
+      "0 ialah integer negatif",
+      "0 ialah integer, tetapi bukan positif dan bukan negatif",
+      "0 bukan integer"
+    ],
+    correct:2,
+    explain:"Sifar ialah integer yang neutral — bukan positif dan bukan negatif."
+  }
+];
+
+// Modul C — 1.1.3 Wakil integer pada garis nombor & kedudukan berbanding integer lain
+const modC = [
+  { id:"C1", stem:"Klik pada garis nombor untuk menunjukkan kedudukan integer −4.", target:-4 },
+  { id:"C2", stem:"Klik pada garis nombor untuk menunjukkan kedudukan integer +6.", target:6 },
+  {
+    id:"C3",
+    stem:"Pada garis nombor, integer −2 terletak di sebelah manakah berbanding +1?",
+    options:["Sebelah kanan +1 (lebih besar)","Sebelah kiri +1 (lebih kecil)","Kedudukan sama","Tidak boleh ditentukan"],
+    correct:1,
+    explain:"Semakin ke kiri pada garis nombor, nilai semakin kecil. −2 di sebelah kiri +1, jadi −2 lebih kecil."
+  }
+];
+
+// Modul D — 1.1.4 Banding & susun integer mengikut tertib
+const modD = [
+  {
+    id:"D1",
+    stem:"Bandingkan: −8 ___ −3. Isikan simbol yang betul.",
+    options:["−8 > −3","−8 < −3","−8 = −3","Tidak boleh dibandingkan"],
+    correct:1,
+    explain:"Pada garis nombor, −8 lebih ke kiri daripada −3, maka −8 < −3 (−8 lebih kecil)."
+  },
+  {
+    id:"D2",
+    stem:"Susun integer berikut mengikut tertib MENAIK: 5, −6, 0, −2",
+    options:["5, 0, −2, −6","−6, −2, 0, 5","−2, −6, 0, 5","0, −2, −6, 5"],
+    correct:1,
+    explain:"Tertib menaik bermula dari terkecil: −6, −2, 0, 5."
+  },
+  {
+    id:"D3",
+    stem:"Suhu 4 bandar: Genting −1°C, Kuala Lumpur 32°C, Cameron 14°C, Kota Bharu 30°C. Bandar manakah PALING SEJUK?",
+    options:["Genting","Kuala Lumpur","Cameron","Kota Bharu"],
+    correct:0,
+    explain:"−1°C ialah nilai paling kecil berbanding 32, 14, dan 30 — jadi Genting paling sejuk."
+  }
+];
+
+// Bank Soalan 4 Aras (sebelum Tiket Keluar)
+const bank = [
+  {
+    level:"Rendah", id:"BR1",
+    stem:"Antara berikut, yang manakah integer NEGATIF?",
+    options:["+9","0","−15","2.5"],
+    correct:2,
+    explain:"Tanda negatif (−) menunjukkan integer negatif: −15."
+  },
+  {
+    level:"Rendah", id:"BR2",
+    stem:"Ketinggian Gunung Kinabalu lebih kurang 4095 m ATAS paras laut. Ini diwakili sebagai integer:",
+    options:["+4095","−4095","4.095","0"],
+    correct:0,
+    explain:"Atas paras laut = positif, jadi +4095."
+  },
+  {
+    level:"Sederhana", id:"BS1",
+    stem:"Susun mengikut tertib MENURUN: −3, 7, −10, 1",
+    options:["7, 1, −3, −10","−10, −3, 1, 7","7, −1, 3, −10","1, −3, 7, −10"],
+    correct:0,
+    explain:"Tertib menurun bermula terbesar: 7, 1, −3, −10."
+  },
+  {
+    level:"Sederhana", id:"BS2",
+    stem:"Palung Mariana pada kedalaman lebih kurang 10 994 m BAWAH paras laut. Nilai integer bagi kedalaman ini ialah:",
+    options:["+10994","−10994","10.994","tiada integer sesuai"],
+    correct:1,
+    explain:"Bawah paras laut = negatif, jadi −10994."
+  },
+  {
+    level:"Tinggi", id:"BT1",
+    stem:"Aras tempat letak kereta B3 berada 3 tingkat di bawah paras jalan (0). Pejabat Cg Amin di Aras 4 (atas paras jalan). Berapa BEZA aras antara kedua-duanya (dalam bilangan tingkat)?",
+    options:["1 tingkat","3 tingkat","4 tingkat","7 tingkat"],
+    correct:3,
+    explain:"Aras 4 diwakili +4, B3 diwakili −3. Beza aras = 4 − (−3) = 7 tingkat."
+  },
+  {
+    level:"Tinggi", id:"BT2",
+    stem:"Empat pendaki merekod ketinggian relatif dari base camp (0 m): Ali +120 m, Bakri −45 m, Chong −80 m, Dinie +30 m. Susun mereka daripada yang PALING RENDAH kedudukan kepada PALING TINGGI.",
+    options:[
+      "Ali, Dinie, Bakri, Chong",
+      "Chong, Bakri, Dinie, Ali",
+      "Bakri, Chong, Ali, Dinie",
+      "Dinie, Ali, Chong, Bakri"
+    ],
+    correct:1,
+    explain:"Tertib menaik ikut nilai integer: −80 (Chong), −45 (Bakri), +30 (Dinie), +120 (Ali)."
+  },
+  {
+    level:"KBAT", id:"BK1",
+    stem:"Cg Din mendakwa: \"−50 lebih besar daripada −20 kerana 50 lebih besar daripada 20.\" Adakah dakwaan ini BETUL? Kenal pasti kesilapan (jika ada).",
+    options:[
+      "Betul — 50 > 20, jadi −50 > −20",
+      "Salah — untuk integer negatif, semakin besar nilai tanpa tanda, semakin KECIL nilai sebenar; −50 < −20",
+      "Betul, kerana tanda negatif tidak memberi kesan kepada perbandingan",
+      "Tidak boleh ditentukan tanpa garis nombor"
+    ],
+    correct:1,
+    explain:"Ini kesilapan lazim! Bagi integer negatif, semakin jauh dari 0, semakin kecil nilainya. −50 lebih jauh dari 0 berbanding −20, jadi −50 < −20."
+  },
+  {
+    level:"KBAT", id:"BK2",
+    stem:"Sebuah kapal selam berada pada kedudukan −120 m (bawah paras laut). Ia perlu naik supaya kedudukannya menjadi TEPAT separuh daripada kedalaman asal (masih di bawah paras laut). Berapakah kedudukan barunya?",
+    options:["−60 m","−240 m","+60 m","−90 m"],
+    correct:0,
+    explain:"Separuh daripada 120 m ialah 60 m. Kedudukan baru masih di bawah paras laut: −60 m."
+  }
+];
+
+// Tiket Keluar
+const exitQ = [
+  {
+    id:"E1",
+    stem:"Suhu di dalam freezer ialah 24 darjah di bawah takat beku. Tulis sebagai integer.",
+    options:["+24","−24","24.0","Bukan integer"],
+    correct:1,
+    explain:"Di bawah takat beku = negatif: −24."
+  },
+  {
+    id:"E2",
+    stem:"Susun MENAIK: −5, 2, −9, 0",
+    options:["−9, −5, 0, 2","2, 0, −5, −9","−5, −9, 0, 2","0, −5, 2, −9"],
+    correct:0,
+    explain:"Tertib menaik: −9, −5, 0, 2."
+  },
+  {
+    id:"E3",
+    stem:"Antara −12 dan −7, yang manakah LEBIH KECIL?",
+    options:["−12","−7","Sama nilai","Tidak boleh dibandingkan"],
+    correct:0,
+    explain:"−12 lebih jauh dari 0 pada arah negatif, jadi −12 < −7."
+  }
+];
+
+/* ---------- UTILITI LOG ---------- */
+function logAnswer(logArray, record){
+  logArray.push(record);
+  saveState();
+}
+
+/* ---------- RENDER UTAMA ---------- */
+function render(){
+  const app = document.getElementById("app");
+  const screen = currentScreen();
+  let html = "";
+  switch(screen){
+    case "welcome": html = screenWelcome(); break;
+    case "identitas": html = screenIdentitas(); break;
+    case "objektif": html = screenObjektif(); break;
+    case "diagnostic": html = screenDiagnostic(); break;
+    case "notes": html = screenNotes(); break;
+    case "moduleMenu": html = screenModuleMenu(); break;
+    case "moduleA": html = screenModule("A", modA, "1.1.1 Kenal Positif & Negatif"); break;
+    case "moduleB": html = screenModule("B", modB, "1.1.2 Kenal & Perihal Integer"); break;
+    case "moduleC": html = screenModuleC(); break;
+    case "moduleD": html = screenModule("D", modD, "1.1.4 Banding & Susun Integer"); break;
+    case "bankIntro": html = screenBankIntro(); break;
+    case "bank": html = screenBank(); break;
+    case "exitTicket": html = screenExit(); break;
+    case "summary": html = screenSummary(); break;
+    default: html = screenWelcome();
+  }
+  app.innerHTML = `<div class="version-badge">🔖 VERSI: ${VERSION}</div>` + html;
+}
+
+/* ---------- SKRIN: WELCOME ---------- */
+function screenWelcome(){
+  return `
+    <div style="padding-top:50px; text-align:center;">
+      <div class="pill">EKSPEDISI MATEMATIK</div>
+      <h1 style="margin-top:14px;">🏔️ Dari Puncak ke Palung</h1>
+      <p class="muted">Standard Kandungan 1.1 — Integer<br>KSSM Matematik Tingkatan 1</p>
+      <div class="card" style="text-align:left; margin-top:24px;">
+        <h3>Apa yang menanti anda?</h3>
+        <p class="muted" style="margin-bottom:0;">Anda akan mendaki dari dasar Palung Mariana ke puncak Gunung Kinabalu — menguasai konsep integer melalui situasi sebenar: suhu, kedudukan, untung-rugi, dan ketinggian.</p>
+      </div>
+      <button class="btn btn-primary" onclick="nextFromWelcome()">Mula Ekspedisi →</button>
+    </div>
+  `;
+}
+function nextFromWelcome(){ goTo("identitas"); }
+
+/* ---------- SKRIN: IDENTITAS ---------- */
+function screenIdentitas(){
+  return `
+    <div class="topbar"><button class="back" onclick="goBack()">← Kembali</button></div>
+    <h2>Sebelum bermula...</h2>
+    <p class="muted">Isikan maklumat anda untuk rekod prestasi.</p>
+    <div class="card">
+      <label for="inpName">Nama</label>
+      <input type="text" id="inpName" placeholder="Nama penuh" value="${escapeHtml(state.name)}">
+      <label for="inpKelas">Kelas</label>
+      <input type="text" id="inpKelas" placeholder="Contoh: 1 Cemerlang" value="${escapeHtml(state.kelas)}">
+    </div>
+    <button class="btn btn-primary" id="btnStart" onclick="submitIdentitas()">Sedia! Mulakan Pengembaraan →</button>
+  `;
+}
+function submitIdentitas(){
+  const n = document.getElementById("inpName").value.trim();
+  const k = document.getElementById("inpKelas").value.trim();
+  if(!n || !k){
+    alertInline("Sila isikan Nama dan Kelas sebelum meneruskan.");
+    return;
+  }
+  state.name = n;
+  state.kelas = k;
+  if(!state.startTime){ state.startTime = Date.now(); }
+  saveState();
+  goTo("objektif");
+}
+function alertInline(msg){
+  const card = document.querySelector(".card");
+  let warn = document.getElementById("inlineWarn");
+  if(!warn){
+    warn = document.createElement("div");
+    warn.id = "inlineWarn";
+    warn.className = "feedback no";
+    card.appendChild(warn);
+  }
+  warn.textContent = msg;
+}
+
+/* ---------- SKRIN: OBJEKTIF / MISSION BRIEFING ---------- */
+function screenObjektif(){
+  return `
+    <div class="topbar"><button class="back" onclick="goBack()">← Kembali</button></div>
+    <h2>🎯 Taklimat Misi</h2>
+    <div class="card">
+      <h3>Objektif Pembelajaran</h3>
+      <p>Selepas ekspedisi ini, anda akan boleh:</p>
+      <div class="databox">1. Mengenal nombor positif dan negatif berdasarkan situasi sebenar.</div>
+      <div class="databox">2. Mengenal dan memerihalkan integer.</div>
+      <div class="databox">3. Mewakilkan integer pada garis nombor dan mengaitkan kedudukannya.</div>
+      <div class="databox">4. Membanding dan menyusun integer mengikut tertib.</div>
+    </div>
+    <div class="card">
+      <h3>Kriteria Kejayaan</h3>
+      <p class="muted" style="margin-bottom:0;">Anda berjaya apabila boleh menyelesaikan sekurang-kurangnya 8 daripada 10 soalan dalam Bank Soalan dengan betul, merangkumi semua aras kesukaran.</p>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('diagnostic')">Mula Semakan Awal →</button>
+  `;
+}
+
+/* ---------- SKRIN: SEMAKAN AWAL (DIAGNOSTIC) ---------- */
+const diagQ = [
+  { id:"DG1", stem:"Suhu −5°C bermaksud:", options:["5°C atas takat beku","5°C bawah takat beku","5°C tepat pada takat beku","Tidak berkaitan takat beku"], correct:1 },
+  { id:"DG2", stem:"Yang manakah nombor NEGATIF?", options:["7","0","−3","1.5"], correct:2 },
+  { id:"DG3", stem:"Nombor manakah LEBIH BESAR: −2 atau −9?", options:["−2","−9","Sama","Tidak pasti"], correct:0 }
+];
+function screenDiagnostic(){
+  const i = state.qIndex;
+  if(i >= diagQ.length){
+    return `
+      <h2>✅ Semakan Awal Selesai</h2>
+      <p class="muted">Bagus! Sekarang mari kita kukuhkan kefahaman dengan Nota Lengkap sebelum meneruskan latihan.</p>
+      <button class="btn btn-primary" onclick="goTo('notes')">Lihat Nota Lengkap →</button>
+    `;
+  }
+  const q = diagQ[i];
+  return `
+    <div class="topbar"><span class="muted">Semakan Awal ${i+1}/${diagQ.length}</span></div>
+    <div class="progressbar"><div style="width:${(i/diagQ.length)*100}%"></div></div>
+    <div class="card">
+      <h3>${q.stem}</h3>
+      <div id="optWrap">
+        ${q.options.map((o,idx)=>`<button class="btn-option" onclick="answerDiagnostic(${idx})">${o}</button>`).join("")}
+      </div>
+    </div>
+  `;
+}
+function answerDiagnostic(idx){
+  const q = diagQ[state.qIndex];
+  const correct = idx === q.correct;
+  logAnswer(state.diagLog, { id:q.id, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:"Diagnostik" });
+  state.qIndex++;
+  saveState();
+  render();
+}
+
+/* ---------- SKRIN: NOTA LENGKAP ---------- */
+function screenNotes(){
+  return `
+    <div class="topbar"><button class="back" onclick="goBack()">← Kembali</button></div>
+    <h2>📘 Nota Lengkap: Integer</h2>
+    <div class="card">
+      <h3>1. Apakah Integer?</h3>
+      <p>Integer ialah <b>nombor bulat</b> — positif, negatif, atau sifar. Integer TIDAK termasuk pecahan atau perpuluhan.</p>
+      <div class="databox">Contoh integer: ..., −3, −2, −1, 0, 1, 2, 3, ...</div>
+      <div class="databox neg">Bukan integer: ½, 2.75, −3.2 (kerana ada pecahan/perpuluhan)</div>
+    </div>
+    <div class="card">
+      <h3>2. Nombor Positif & Negatif dalam Situasi Sebenar</h3>
+      <p>Tanda <b>positif (+)</b> dan <b>negatif (−)</b> mewakili dua arah bertentangan:</p>
+      <div class="databox pos">+ : atas paras laut, untung, suhu atas 0°C, ke kanan/atas</div>
+      <div class="databox neg">− : bawah paras laut, rugi, suhu bawah 0°C, ke kiri/bawah</div>
+      <p class="muted" style="margin-bottom:0;">Contoh: Kedalaman Palung Mariana ≈ −10 994 m. Ketinggian Gunung Kinabalu ≈ +4 095 m.</p>
+    </div>
+    <div class="card">
+      <h3>3. Garis Nombor</h3>
+      <p>Integer boleh diwakilkan pada garis nombor. Semakin ke <b>kanan</b>, nilai semakin <b>besar</b>. Semakin ke <b>kiri</b>, nilai semakin <b>kecil</b>.</p>
+      <div class="numline-wrap">${renderNumberLineSVG(0, [], "notes")}</div>
+    </div>
+    <div class="card">
+      <h3>4. Membanding & Menyusun Integer</h3>
+      <p><b>Contoh Lengkap:</b> Bandingkan −8 dan −3.</p>
+      <div class="databox">Langkah 1: Letakkan kedua-dua nombor pada garis nombor.</div>
+      <div class="databox">Langkah 2: −8 terletak lebih ke kiri berbanding −3.</div>
+      <div class="databox">Langkah 3: Oleh itu, −8 &lt; −3 (−8 lebih kecil daripada −3).</div>
+      <p class="muted" style="margin-top:8px;"><b>⚠️ Miskonsepsi biasa:</b> "−50 lebih besar daripada −20 sebab 50 &gt; 20" — INI SALAH. Bagi integer negatif, semakin besar nombor tanpa tanda, semakin KECIL nilai sebenarnya.</p>
+    </div>
+    <div class="card">
+      <h3>📌 Rumusan Pantas</h3>
+      <div class="databox">• Integer = nombor bulat (+, −, atau 0), tiada pecahan/perpuluhan</div>
+      <div class="databox">• + = atas/untung/lebih panas &nbsp;|&nbsp; − = bawah/rugi/lebih sejuk</div>
+      <div class="databox">• Kanan garis nombor = lebih besar; Kiri = lebih kecil</div>
+      <div class="databox">• Integer negatif: makin "besar" angka, makin kecil nilainya</div>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('moduleMenu')">Faham, Sedia untuk Latihan →</button>
+  `;
+}
+
+/* ---------- SVG GARIS NOMBOR (self-contained) ---------- */
+function renderNumberLineSVG(highlightVal, clickable, mode){
+  const min=-12, max=12;
+  const w = 640, h = 90;
+  const marginX = 20;
+  const usable = w - marginX*2;
+  const scale = usable / (max-min);
+  function xOf(v){ return marginX + (v-min)*scale; }
+  let ticks = "";
+  for(let v=min; v<=max; v++){
+    const x = xOf(v);
+    const isMajor = (v % 2 === 0);
+    const tickH = isMajor ? 10 : 6;
+    const color = v===0 ? "#f4b942" : (v>0 ? "#2dd4bf" : "#f97362");
+    let clickAttr = "";
+    if(mode === "clickable"){
+      clickAttr = `class="tick-btn" onclick="chooseNumberLine(${v})"`;
+    }
+    ticks += `<g ${clickAttr}>
+      <line x1="${x}" y1="40" x2="${x}" y2="${40+tickH}" stroke="${color}" stroke-width="2"/>
+      ${isMajor ? `<text x="${x}" y="66" font-size="11" fill="#9fb8c3" text-anchor="middle">${v}</text>` : ""}
+      ${mode==="clickable" ? `<circle cx="${x}" cy="30" r="9" fill="rgba(255,255,255,0.03)"/>` : ""}
+    </g>`;
+  }
+  let marker = "";
+  if(highlightVal !== null && typeof highlightVal !== "undefined" && highlightVal !== 0 || highlightVal === 0){
+    if(highlightVal !== "" && highlightVal !== null && typeof highlightVal !== "undefined"){
+      const x = xOf(highlightVal);
+      marker = `<circle cx="${x}" cy="30" r="7" fill="#f4b942" stroke="#3a2600" stroke-width="1.5"/>`;
+    }
+  }
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" xmlns="http://www.w3.org/2000/svg">
+    <line x1="${marginX}" y1="40" x2="${w-marginX}" y2="40" stroke="#2c4d63" stroke-width="2"/>
+    ${ticks}
+    ${marker}
+  </svg>`;
+}
+
+/* ---------- SKRIN: MENU MODUL ---------- */
+function screenModuleMenu(){
+  const items = [
+    {key:"A", label:"Modul A · Kenal Positif & Negatif", sp:"1.1.1", screen:"moduleA"},
+    {key:"B", label:"Modul B · Kenal & Perihal Integer", sp:"1.1.2", screen:"moduleB"},
+    {key:"C", label:"Modul C · Garis Nombor", sp:"1.1.3", screen:"moduleC"},
+    {key:"D", label:"Modul D · Banding & Susun", sp:"1.1.4", screen:"moduleD"}
+  ];
+  const doneCount = Object.values(state.moduleDone).filter(Boolean).length;
+  const rows = items.map((it, idx)=>{
+    const done = state.moduleDone[it.key];
+    const prevDone = idx===0 ? true : state.moduleDone[items[idx-1].key];
+    const locked = !prevDone && !done;
+    return `<div class="module-row ${locked?'locked':''}" onclick="${locked? '': `openModule('${it.screen}')`}">
+      <div>
+        <div style="font-weight:700;">${it.label}</div>
+        <div class="muted" style="font-size:0.78rem;">SP ${it.sp}</div>
+      </div>
+      <div class="check">${done ? "✅" : (locked ? "🔒" : "▶️")}</div>
+    </div>`;
+  }).join("");
+  return `
+    <div class="topbar"><span class="muted">Latihan Berpandu</span></div>
+    <h2>🧭 Peta Modul</h2>
+    <div class="progressbar"><div style="width:${(doneCount/4)*100}%"></div></div>
+    ${rows}
+    ${doneCount===4 ? `<button class="btn btn-primary" onclick="goTo('bankIntro')">Semua Modul Selesai — Teruskan →</button>` : `<p class="muted" style="text-align:center;">Selesaikan semua modul untuk buka Bank Soalan.</p>`}
+  `;
+}
+function openModule(screen){
+  state.qIndex = 0;
+  goTo(screen);
+}
+
+/* ---------- SKRIN MODUL GENERIK (A, B, D) ---------- */
+function screenModule(key, questions, title){
+  const i = state.qIndex;
+  if(i >= questions.length){
+    state.moduleDone[key] = true;
+    saveState();
+    return `
+      <h2>✅ ${title} — Selesai!</h2>
+      <p class="muted">Tahniah! Anda telah menguasai bahagian ini.</p>
+      <button class="btn btn-primary" onclick="goTo('moduleMenu')">Kembali ke Peta Modul →</button>
+    `;
+  }
+  const q = questions[i];
+  return `
+    <div class="topbar"><button class="back" onclick="goTo('moduleMenu')">← Peta Modul</button></div>
+    <h3>${title}</h3>
+    <div class="progressbar"><div style="width:${(i/questions.length)*100}%"></div></div>
+    <div class="card">
+      <p style="font-weight:600;">${q.stem}</p>
+      <div id="optWrap-${q.id}">
+        ${q.options.map((o,idx)=>`<button class="btn-option" id="opt-${q.id}-${idx}" onclick="answerModule('${key}', '${q.id}', ${idx})">${o}</button>`).join("")}
+      </div>
+      <div id="fb-${q.id}"></div>
+    </div>
+  `;
+}
+function getModuleData(key){
+  if(key==="A") return modA;
+  if(key==="B") return modB;
+  if(key==="D") return modD;
+  return [];
+}
+function answerModule(key, qid, idx){
+  const questions = getModuleData(key);
+  const q = questions.find(x=>x.id===qid);
+  if(!q || q._answered) return;
+  q._answered = true;
+  const correct = idx === q.correct;
+  q.options.forEach((o,oi)=>{
+    const btn = document.getElementById(`opt-${qid}-${oi}`);
+    btn.classList.add("disabled");
+    if(oi===q.correct) btn.classList.add("correct");
+    else if(oi===idx) btn.classList.add("wrong");
+  });
+  const fb = document.getElementById(`fb-${qid}`);
+  fb.className = "feedback " + (correct ? "ok" : "no");
+  fb.innerHTML = (correct ? "✅ Betul! " : "❌ Belum tepat. ") + q.explain;
+  fb.insertAdjacentHTML("afterend", `<button class="btn btn-primary" onclick="advanceModule('${key}')">Seterusnya →</button>`);
+  logAnswer(state.practiceLog, { id:q.id, module:key, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:"Latihan Berpandu" });
+}
+function advanceModule(key){
+  const questions = getModuleData(key);
+  questions.forEach(q=>{ q._answered = false; });
+  state.qIndex++;
+  saveState();
+  render();
+}
+
+/* ---------- SKRIN MODUL C (Garis Nombor - klik & MCQ) ---------- */
+function screenModuleC(){
+  const i = state.qIndex;
+  if(i >= modC.length){
+    state.moduleDone["C"] = true;
+    saveState();
+    return `
+      <h2>✅ Modul C — Selesai!</h2>
+      <p class="muted">Anda kini mahir mewakilkan integer pada garis nombor.</p>
+      <button class="btn btn-primary" onclick="goTo('moduleMenu')">Kembali ke Peta Modul →</button>
+    `;
+  }
+  const q = modC[i];
+  if(q.options){
+    return `
+      <div class="topbar"><button class="back" onclick="goTo('moduleMenu')">← Peta Modul</button></div>
+      <h3>1.1.3 Garis Nombor</h3>
+      <div class="progressbar"><div style="width:${(i/modC.length)*100}%"></div></div>
+      <div class="card">
+        <p style="font-weight:600;">${q.stem}</p>
+        <div id="optWrapC">
+          ${q.options.map((o,idx)=>`<button class="btn-option" id="optC-${idx}" onclick="answerModuleC_mcq(${idx})">${o}</button>`).join("")}
+        </div>
+        <div id="fbC"></div>
+      </div>
+    `;
+  }
+  return `
+    <div class="topbar"><button class="back" onclick="goTo('moduleMenu')">← Peta Modul</button></div>
+    <h3>1.1.3 Garis Nombor</h3>
+    <div class="progressbar"><div style="width:${(i/modC.length)*100}%"></div></div>
+    <div class="card">
+      <p style="font-weight:600;">${q.stem}</p>
+      <div class="numline-wrap">${renderNumberLineSVG(null, [], "clickable")}</div>
+      <div id="fbC"></div>
+    </div>
+  `;
+}
+function chooseNumberLine(v){
+  const i = state.qIndex;
+  const q = modC[i];
+  if(q._answered) return;
+  q._answered = true;
+  const correct = v === q.target;
+  const fb = document.getElementById("fbC");
+  fb.className = "feedback " + (correct ? "ok" : "no");
+  fb.innerHTML = (correct ? "✅ Tepat! " : `❌ Belum tepat (anda pilih ${v}). `) + `Kedudukan yang betul ialah ${q.target}.`;
+  document.querySelector(".numline-wrap").innerHTML = renderNumberLineSVG(q.target, [], "static");
+  fb.insertAdjacentHTML("afterend", `<button class="btn btn-primary" onclick="advanceModuleC()">Seterusnya →</button>`);
+  logAnswer(state.practiceLog, { id:q.id, module:"C", question:q.stem, chosen:String(v), correctAns:String(q.target), correct, level:"Latihan Berpandu" });
+}
+function answerModuleC_mcq(idx){
+  const i = state.qIndex;
+  const q = modC[i];
+  if(q._answered) return;
+  q._answered = true;
+  const correct = idx === q.correct;
+  q.options.forEach((o,oi)=>{
+    const btn = document.getElementById(`optC-${oi}`);
+    btn.classList.add("disabled");
+    if(oi===q.correct) btn.classList.add("correct");
+    else if(oi===idx) btn.classList.add("wrong");
+  });
+  const fb = document.getElementById("fbC");
+  fb.className = "feedback " + (correct ? "ok" : "no");
+  fb.innerHTML = (correct ? "✅ Betul! " : "❌ Belum tepat. ") + q.explain;
+  fb.insertAdjacentHTML("afterend", `<button class="btn btn-primary" onclick="advanceModuleC()">Seterusnya →</button>`);
+  logAnswer(state.practiceLog, { id:q.id, module:"C", question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:"Latihan Berpandu" });
+}
+function advanceModuleC(){
+  modC.forEach(q=>{ q._answered = false; });
+  state.qIndex++;
+  saveState();
+  render();
+}
+
+/* ---------- SKRIN: PENGENALAN BANK SOALAN ---------- */
+function screenBankIntro(){
+  return `
+    <h2>🏆 Bank Soalan 4 Aras</h2>
+    <div class="card">
+      <p>Sebelum Tiket Keluar, anda akan menempuh 8 soalan merentasi 4 aras kesukaran:</p>
+      <div class="databox"><span class="badge-level lvl-rendah">RENDAH</span> Ingat & kenal pasti fakta asas</div>
+      <div class="databox"><span class="badge-level lvl-sederhana">SEDERHANA</span> Aplikasi prosedur biasa</div>
+      <div class="databox"><span class="badge-level lvl-tinggi">TINGGI</span> Analisis & multi-langkah</div>
+      <div class="databox"><span class="badge-level lvl-kbat">KBAT</span> Penaakulan & konteks sebenar</div>
+      <p class="muted" style="margin-bottom:0;">Jika tersilap pada aras Tinggi/KBAT, petunjuk akan diberikan.</p>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('bank', true)">Mula Bank Soalan →</button>
+  `;
+}
+
+/* ---------- SKRIN: BANK SOALAN ---------- */
+function screenBank(){
+  const i = state.qIndex;
+  if(i >= bank.length){
+    return `
+      <h2>✅ Bank Soalan Selesai</h2>
+      <p class="muted">Bersedia untuk cabaran akhir?</p>
+      <button class="btn btn-primary" onclick="goTo('exitTicket', true)">Ke Tiket Keluar →</button>
+    `;
+  }
+  const q = bank[i];
+  const lvlClass = {"Rendah":"lvl-rendah","Sederhana":"lvl-sederhana","Tinggi":"lvl-tinggi","KBAT":"lvl-kbat"}[q.level];
+  return `
+    <div class="topbar"><span class="muted">Soalan ${i+1}/${bank.length}</span></div>
+    <div class="progressbar"><div style="width:${(i/bank.length)*100}%"></div></div>
+    <div class="card">
+      <span class="badge-level ${lvlClass}">${q.level}</span>
+      <p style="font-weight:600;">${q.stem}</p>
+      <div id="optWrapBank">
+        ${q.options.map((o,idx)=>`<button class="btn-option" id="optBank-${idx}" onclick="answerBank(${idx})">${o}</button>`).join("")}
+      </div>
+      <div id="fbBank"></div>
+      <div id="hintBank"></div>
+    </div>
+  `;
+}
+function answerBank(idx){
+  const i = state.qIndex;
+  const q = bank[i];
+  if(q._answered) return;
+  const correct = idx === q.correct;
+  const needsScaffold = !correct && (q.level==="Tinggi" || q.level==="KBAT") && !q._hinted;
+  if(needsScaffold){
+    q._hinted = true;
+    state.hintsUsedTotal++;
+    saveState();
+    const hintDiv = document.getElementById("hintBank");
+    hintDiv.innerHTML = `<div class="hint-box">💡 Petunjuk: Cuba letakkan nombor-nombor ini pada garis nombor dahulu, atau kenal pasti dahulu tanda (+/−) setiap situasi sebelum membanding.</div>`;
+    // benarkan cuba sekali lagi tanpa mengunci pilihan
+    return;
+  }
+  q._answered = true;
+  q.options.forEach((o,oi)=>{
+    const btn = document.getElementById(`optBank-${oi}`);
+    btn.classList.add("disabled");
+    if(oi===q.correct) btn.classList.add("correct");
+    else if(oi===idx) btn.classList.add("wrong");
+  });
+  const fb = document.getElementById("fbBank");
+  fb.className = "feedback " + (correct ? "ok" : "no");
+  fb.innerHTML = (correct ? "✅ Betul! " : "❌ Belum tepat. ") + q.explain;
+  fb.insertAdjacentHTML("afterend", `<button class="btn btn-primary" onclick="advanceBank()">Seterusnya →</button>`);
+  logAnswer(state.bankLog, { id:q.id, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:q.level });
+}
+function advanceBank(){
+  state.qIndex++;
+  saveState();
+  render();
+}
+
+/* ---------- SKRIN: TIKET KELUAR ---------- */
+function screenExit(){
+  const i = state.qIndex;
+  if(i >= exitQ.length){
+    state.endTime = Date.now();
+    saveState();
+    return `
+      <h2>🎉 Ekspedisi Selesai!</h2>
+      <p class="muted">Tekan butang di bawah untuk lihat Ringkasan penuh.</p>
+      <button class="btn btn-gold" onclick="goTo('summary')">Lihat Ringkasan →</button>
+    `;
+  }
+  const q = exitQ[i];
+  return `
+    <div class="topbar"><span class="muted">Tiket Keluar ${i+1}/${exitQ.length}</span></div>
+    <div class="progressbar"><div style="width:${(i/exitQ.length)*100}%"></div></div>
+    <div class="card">
+      <p style="font-weight:600;">${q.stem}</p>
+      <div id="optWrapExit">
+        ${q.options.map((o,idx)=>`<button class="btn-option" id="optExit-${idx}" onclick="answerExit(${idx})">${o}</button>`).join("")}
+      </div>
+      <div id="fbExit"></div>
+    </div>
+  `;
+}
+function answerExit(idx){
+  const i = state.qIndex;
+  const q = exitQ[i];
+  if(q._answered) return;
+  q._answered = true;
+  const correct = idx === q.correct;
+  q.options.forEach((o,oi)=>{
+    const btn = document.getElementById(`optExit-${oi}`);
+    btn.classList.add("disabled");
+    if(oi===q.correct) btn.classList.add("correct");
+    else if(oi===idx) btn.classList.add("wrong");
+  });
+  const fb = document.getElementById("fbExit");
+  fb.className = "feedback " + (correct ? "ok" : "no");
+  fb.innerHTML = (correct ? "✅ Betul! " : "❌ Belum tepat. ") + q.explain;
+  fb.insertAdjacentHTML("afterend", `<button class="btn btn-primary" onclick="advanceExit()">Seterusnya →</button>`);
+  logAnswer(state.exitLog, { id:q.id, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:"Tiket Keluar" });
+}
+function advanceExit(){
+  state.qIndex++;
+  saveState();
+  render();
+}
+
+/* ---------- SKRIN: RINGKASAN ---------- */
+function allLogs(){
+  return [].concat(state.diagLog, state.practiceLog, state.bankLog, state.exitLog);
+}
+function screenSummary(){
+  const logs = allLogs();
+  const gradedLogs = [].concat(state.practiceLog, state.bankLog, state.exitLog); // diagnostik tidak dikira markah
+  const totalCorrect = gradedLogs.filter(l=>l.correct).length;
+  const totalQ = gradedLogs.length;
+  const pct = totalQ ? Math.round((totalCorrect/totalQ)*100) : 0;
+  let masteryLabel = "Tahap 1 — Asas";
+  if(pct>=80) masteryLabel = "Tahap 3 — Cemerlang 🏔️";
+  else if(pct>=60) masteryLabel = "Tahap 2 — Baik";
+  const durationSec = state.endTime && state.startTime ? Math.round((state.endTime-state.startTime)/1000) : 0;
+  const mins = Math.floor(durationSec/60), secs = durationSec%60;
+
+  const listItems = logs.map(l=>{
+    return `<div class="scoreitem">
+      <div>${l.level ? `<span class="muted">[${l.level}]</span> ` : ""}${escapeHtml(l.question)}</div>
+      <div>${l.correct ? '<span class="ok-tag">✔ Betul</span>' : '<span class="no-tag">✘ Salah</span>'} — Jawapan anda: <b>${escapeHtml(l.chosen)}</b>${l.correct ? "" : ` | Jawapan betul: <b>${escapeHtml(l.correctAns)}</b>`}</div>
+    </div>`;
+  }).join("");
+
+  return `
+    <h2>📋 Ringkasan Ekspedisi</h2>
+    <div class="card">
+      <p style="margin-bottom:4px;"><b>Nama:</b> ${escapeHtml(state.name)}</p>
+      <p style="margin-bottom:0;"><b>Kelas:</b> ${escapeHtml(state.kelas)}</p>
+    </div>
+    <div class="statrow">
+      <div class="statbox"><div class="num">${totalCorrect}/${totalQ}</div><div class="lbl">Markah</div></div>
+      <div class="statbox"><div class="num">${pct}%</div><div class="lbl">Peratus</div></div>
+      <div class="statbox"><div class="num">${mins}m ${secs}s</div><div class="lbl">Masa</div></div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="pill" style="font-size:0.85rem;">${masteryLabel}</div>
+    </div>
+    <h3>Log Jawapan Terperinci</h3>
+    <div class="scorelist">${listItems}</div>
+    <button class="btn btn-ghost" onclick="resetApp()">🔄 Set Semula & Cuba Lagi</button>
+    <p class="footer-note">SK 1.1 Integer · KSSM Matematik Tingkatan 1 · ${VERSION}<br>Sila tangkap skrin ini untuk dihantar kepada guru.</p>
+  `;
+}
+
+/* ---------- RESET (skrin pengesahan dalaman, BUKAN confirm()) ---------- */
+function resetApp(){
+  goTo("confirmReset");
+}
+function screenConfirmReset(){
+  return `
+    <h2>⚠️ Sahkan Set Semula</h2>
+    <div class="card">
+      <p>Tindakan ini akan memadam semua rekod jawapan dan markah anda untuk permulaan baharu. Tindakan ini tidak boleh diundur.</p>
+    </div>
+    <button class="btn btn-primary" style="background:var(--negative);" onclick="doReset()">Ya, Padam & Mula Semula</button>
+    <button class="btn btn-ghost" onclick="goBack()">Batal, Kembali</button>
+  `;
+}
+
+// Daftarkan skrin confirmReset ke dalam render()
+const _origRender = render;
+render = function(){
+  const screen = currentScreen();
+  if(screen === "confirmReset"){
+    document.getElementById("app").innerHTML = `<div class="version-badge">🔖 VERSI: ${VERSION}</div>` + screenConfirmReset();
+    return;
+  }
+  _origRender();
+};
+
+function doReset(){
+  localStorage.removeItem(STORAGE_KEY);
+  state = freshState();
+  render();
+}
+
+/* ---------- UTIL ---------- */
+function escapeHtml(str){
+  if(str === undefined || str === null) return "";
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+/* ---------- MULA ---------- */
+render();
+</script>
+</body>
+</html>

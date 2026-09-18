@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Studio Berita: Pengendalian Data | SK 12.1</title>
+<style>
+  :root{
+    --bg: #0c1420; --bg-alt: #12202f; --surface: #17293b; --surface-2: #1e3448;
+    --border: #2d4c65; --text: #e9f3fb; --muted: #9cb7cf;
+    --positive: #38bdf8; --positive-dark: #1a6f8f;
+    --negative: #fb7185; --negative-dark: #b8324a;
+    --gold: #f4b942; --radius: 14px; --maxw: 560px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: radial-gradient(ellipse at top, #16283c 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh; display:flex; justify-content:center; line-height:1.5;
+  }
+  #app{ width:100%; max-width: var(--maxw); min-height:100vh; padding: 18px 18px 40px; position:relative; }
+  h1,h2,h3{ margin:0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+  h1{ font-size:1.5rem; } h2{ font-size:1.2rem; } h3{ font-size:1.02rem; }
+  p{ margin:0 0 12px; color: var(--text); }
+  .muted{ color: var(--muted); font-size:0.9rem; }
+  .card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:16px; margin-bottom:14px; }
+  .pill{ display:inline-block; padding:3px 10px; border-radius:999px; font-size:0.72rem; font-weight:700; letter-spacing:0.02em; background: var(--surface-2); color: var(--gold); border:1px solid var(--border); }
+  .btn{ display:block; width:100%; padding:14px 16px; border-radius: 12px; border:none; font-size:1rem; font-weight:700; cursor:pointer; margin-top:10px; -webkit-tap-highlight-color: transparent; }
+  .btn:active{ transform: scale(0.98); }
+  .btn-primary{ background: var(--positive); color:#03202c; }
+  .btn-ghost{ background: transparent; color: var(--muted); border:1px solid var(--border); }
+  .btn-gold{ background: var(--gold); color:#3a2600; }
+  .btn-option{ display:block; width:100%; text-align:left; background: var(--surface-2); color: var(--text); border:1px solid var(--border); border-radius:12px; padding:13px 14px; margin-top:9px; font-size:0.98rem; cursor:pointer; }
+  .btn-option.correct{ background: var(--positive-dark); border-color: var(--positive); }
+  .btn-option.wrong{ background: var(--negative-dark); border-color: var(--negative); }
+  .btn-option.disabled{ pointer-events:none; opacity:0.85; }
+  input[type=text]{ width:100%; padding:13px 14px; border-radius:12px; border:1px solid var(--border); background: var(--surface-2); color: var(--text); font-size:1rem; margin-bottom:6px; }
+  label{ font-size:0.85rem; color: var(--muted); display:block; margin-bottom:5px; margin-top:10px; }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:10px; }
+  .topbar .back{ background:none; border:none; color: var(--muted); font-size:0.95rem; cursor:pointer; padding:6px 0; }
+  .progressbar{ width:100%; height:8px; background: var(--surface-2); border-radius:999px; overflow:hidden; margin: 8px 0 16px; }
+  .progressbar > div{ height:100%; background: linear-gradient(90deg, var(--positive), var(--gold)); }
+  .databox{ background: var(--bg-alt); border-left:4px solid var(--gold); border-radius:8px; padding:12px 14px; margin:10px 0; font-size:0.95rem; }
+  .databox.neg{ border-left-color: var(--negative); }
+  .databox.pos{ border-left-color: var(--positive); }
+  .feedback{ border-radius:10px; padding:12px 14px; margin-top:10px; font-size:0.92rem; font-weight:600; }
+  .feedback.ok{ background: rgba(56,189,248,0.15); color: var(--positive); border:1px solid var(--positive); }
+  .feedback.no{ background: rgba(251,113,133,0.15); color: var(--negative); border:1px solid var(--negative); }
+  .hint-box{ background: var(--surface-2); border:1px dashed var(--gold); border-radius:10px; padding:10px 12px; margin-top:8px; font-size:0.88rem; color: var(--gold); }
+  .badge-level{ display:inline-block; font-size:0.68rem; font-weight:800; letter-spacing:0.03em; padding:2px 8px; border-radius:6px; margin-bottom:8px; }
+  .lvl-rendah{ background:#264d3a; color:#7be0a8; }
+  .lvl-sederhana{ background:#2a4763; color:#7fc4f7; }
+  .lvl-tinggi{ background:#5a3a1f; color:#f7b563; }
+  .lvl-kbat{ background:#4a2338; color:#f78fc0; }
+  .statrow{ display:flex; gap:10px; margin-bottom:14px; }
+  .statbox{ flex:1; background: var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px; text-align:center; }
+  .statbox .num{ font-size:1.3rem; font-weight:800; color: var(--gold); }
+  .statbox .lbl{ font-size:0.7rem; color: var(--muted); }
+  .scorelist{ max-height:340px; overflow-y:auto; border:1px solid var(--border); border-radius:12px; }
+  .scoreitem{ padding:10px 12px; border-bottom:1px solid var(--border); font-size:0.85rem; }
+  .scoreitem:last-child{ border-bottom:none; }
+  .scoreitem .ok-tag{ color: var(--positive); font-weight:700; }
+  .scoreitem .no-tag{ color: var(--negative); font-weight:700; }
+  .version-badge{ position:absolute; top:10px; right:10px; font-size:0.62rem; background: var(--surface-2); color: var(--muted); border:1px solid var(--border); padding:3px 7px; border-radius:6px; }
+  .module-row{ display:flex; align-items:center; justify-content:space-between; background: var(--surface); border:1px solid var(--border); border-radius:12px; padding:13px 14px; margin-bottom:10px; cursor:pointer; }
+  .module-row.locked{ opacity:0.45; cursor:not-allowed; }
+  .footer-note{ text-align:center; font-size:0.72rem; color: var(--muted); margin-top:24px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* =========================================================
+   STUDIO BERITA: Pengendalian Data
+   SK 12.1 | KSSM Matematik Tingkatan 1
+   VERSI v1.0
+   ========================================================= */
+const VERSION = "v1.0";
+const STORAGE_KEY = "studio_berita_sk121_state";
+
+function freshState(){
+  return {
+    path:["welcome"], name:"", kelas:"", startTime:null, endTime:null,
+    diagLog:[], practiceLog:[], bankLog:[], exitLog:[],
+    moduleDone:{ A:false,B:false,C:false,D:false,E:false }, moduleIndex:0, qIndex:0,
+    hintsUsedTotal:0, version: VERSION
+  };
+}
+let state = loadState();
+function loadState(){
+  try{
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if(!saved) return freshState();
+    return Object.assign(freshState(), JSON.parse(saved));
+  }catch(e){ return freshState(); }
+}
+function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+function goTo(screen, resetSub){ if(resetSub){ state.qIndex=0; } state.path.push(screen); saveState(); render(); }
+function goBack(){ if(state.path.length>1){ state.path.pop(); } saveState(); render(); }
+function currentScreen(){ return state.path[state.path.length-1]; }
+
+/* ---------- DATA SOALAN ---------- */
+
+// Modul A — 12.1.1 Jana soalan statistik & kumpul data
+const modA = [
+  { id:"A1", stem:"Soalan statistik ialah soalan yang:", options:["boleh dijawab dengan mengumpul data dan terdapat kebolehubahan dalam data","hanya ada satu jawapan tetap","tidak memerlukan data","hanya untuk ujian matematik"], correct:0, explain:"Soalan statistik melibatkan pengumpulan data yang beragam." },
+  { id:"A2", stem:"Antara berikut, yang manakah SOALAN STATISTIK?", options:["Berapakah tinggi purata murid dalam kelas ini?","Berapakah 5+3?","Apakah ibu negara Malaysia?","Berapakah bilangan hari dalam seminggu?"], correct:0, explain:"Tinggi murid berbeza-beza (kebolehubahan) — ini soalan statistik." },
+  { id:"A3", stem:"Kaedah mengumpul data termasuk:", options:["temu bual, tinjauan, eksperimen, pemerhatian","hanya teka","hanya kira nombor","tiada kaedah khusus"], correct:0, explain:"Pelbagai kaedah pengumpulan data yang sah." }
+];
+
+// Modul B — 12.1.2 Klasifikasi data kategori/numerik, jadual kekerapan
+const modB = [
+  { id:"B1", stem:"Data KATEGORI ialah data yang:", options:["menerangkan ciri/kategori (bukan nombor), contoh warna kegemaran","sentiasa berbentuk nombor","hanya boleh dikira","tidak boleh dikumpul"], correct:0, explain:"Data kategori menerangkan sifat/kumpulan, bukan nilai berangka." },
+  { id:"B2", stem:"Data NUMERIK ialah data yang:", options:["berbentuk nombor (diskret atau selanjar)","berbentuk perkataan sahaja","tidak boleh diukur","hanya kategori"], correct:0, explain:"Data numerik berbentuk nombor." },
+  { id:"B3", stem:"Bilangan adik-beradik ialah contoh data numerik jenis:", options:["diskret (nilai bulat, boleh dikira)","selanjar (boleh sebarang nilai perpuluhan)","kategori","tiada jenis"], correct:0, explain:"Bilangan orang sentiasa integer — diskret." },
+  { id:"B4", stem:"Tinggi seseorang murid ialah contoh data numerik jenis:", options:["selanjar (boleh sebarang nilai dalam julat)","diskret","kategori","tiada jenis"], correct:0, explain:"Tinggi boleh sebarang nilai perpuluhan — selanjar." }
+];
+
+// Modul C — 12.1.3-12.1.4 Bina & tukar perwakilan data
+const modC = [
+  { id:"C1", stem:"Carta PALANG sesuai digunakan untuk data:", options:["kategori (bandingkan kekerapan antara kategori)","hanya data berterusan","hanya data masa","tiada kegunaan khusus"], correct:0, explain:"Carta palang membandingkan kekerapan setiap kategori." },
+  { id:"C2", stem:"Carta PAI sesuai digunakan untuk menunjukkan:", options:["peratusan/perkadaran setiap kategori daripada keseluruhan","trend dari masa ke masa","taburan nilai individu","hanya dua kategori"], correct:0, explain:"Carta pai menggambarkan bahagian daripada keseluruhan." },
+  { id:"C3", stem:"Graf GARIS sesuai digunakan untuk menunjukkan:", options:["trend/perubahan data mengikut masa","perbandingan kategori berasingan","peratusan sahaja","data kategori"], correct:0, explain:"Graf garis terbaik untuk trend mengikut masa." },
+  { id:"C4", stem:"Plot BATANG-DAN-DAUN berguna untuk:", options:["menunjukkan taburan data numerik sambil mengekalkan nilai asal","menunjukkan peratusan","hanya data kategori","hanya dua nilai"], correct:0, explain:"Plot batang-dan-daun mengekalkan nilai data sebenar." }
+];
+
+// Modul D — 12.1.5 Tafsir data, inferens, histogram & poligon kekerapan
+const modD = [
+  { id:"D1", stem:"HISTOGRAM digunakan untuk mewakilkan:", options:["taburan kekerapan data numerik berkumpulan (selanjar)","data kategori sahaja","peratusan sahaja","hanya dua nilai"], correct:0, explain:"Histogram sesuai untuk data numerik berkumpulan." },
+  { id:"D2", stem:"Poligon kekerapan dibina dengan:", options:["menyambungkan titik tengah bahagian atas setiap bar histogram","melukis carta pai","melukis carta palang berasingan","tiada kaitan dengan histogram"], correct:0, explain:"Poligon kekerapan disambung daripada titik tengah histogram." },
+  { id:"D3", stem:"Membuat INFERENS daripada data bermaksud:", options:["membuat kesimpulan/ramalan berdasarkan corak dalam data","hanya melukis graf","mengumpul data baru","mengabaikan data"], correct:0, explain:"Inferens = kesimpulan berasaskan corak data." }
+];
+
+// Modul E — 12.1.6 Kepentingan mewakilkan data secara beretika
+const modE = [
+  { id:"E1", stem:"Mewakilkan data secara TIDAK BERETIKA (contoh skala dimanipulasi) boleh menyebabkan:", options:["kekeliruan atau kesimpulan yang mengelirukan pembaca","data lebih tepat","tiada kesan langsung","data lebih mudah difahami"], correct:0, explain:"Manipulasi skala boleh mengelirukan tafsiran pembaca." },
+  { id:"E2", stem:"Antara berikut, amalan TIDAK BERETIKA dalam mewakilkan data:", options:["memotong paksi-y untuk membesar-besarkan perbezaan kecil","menggunakan skala yang konsisten","melabel paksi dengan jelas","menyertakan sumber data"], correct:0, explain:"Memotong paksi-y untuk membesarkan perbezaan adalah amalan mengelirukan." }
+];
+
+// Bank Soalan 4 Aras
+const bank = [
+  { level:"Rendah", id:"BR1", stem:"Soalan statistik mesti ada:", options:["kebolehubahan dalam data","hanya satu jawapan","tiada data","jawapan ya/tidak sahaja"], correct:0, explain:"Kebolehubahan data ialah ciri utama soalan statistik." },
+  { level:"Rendah", id:"BR2", stem:"Data kategori ialah data yang:", options:["menerangkan ciri, bukan nombor","sentiasa nombor","hanya diskret","hanya selanjar"], correct:0, explain:"Data kategori bukan nilai berangka." },
+  { level:"Sederhana", id:"BS1", stem:"Carta yang sesuai untuk tunjukkan peratusan jenis buah kegemaran kelas:", options:["carta pai","graf garis","plot titik","histogram"], correct:0, explain:"Carta pai sesuai untuk peratusan/perkadaran." },
+  { level:"Sederhana", id:"BS2", stem:"Bilangan kereta yang lalu setiap jam ialah data:", options:["numerik diskret","numerik selanjar","kategori","tiada jenis"], correct:0, explain:"Bilangan kereta sentiasa integer — diskret." },
+  { level:"Tinggi", id:"BT1", stem:"Seorang penyelidik ingin tunjukkan TREND jualan kedai selama 12 bulan. Perwakilan data PALING sesuai ialah:", options:["graf garis","carta pai","plot batang-dan-daun","carta palang tunggal"], correct:0, explain:"Graf garis terbaik untuk trend mengikut masa." },
+  { level:"Tinggi", id:"BT2", stem:"Histogram menunjukkan kekerapan tertinggi pada julat 160-170cm bagi tinggi murid. Apakah inferens yang munasabah?", options:["Kebanyakan murid dalam kelas ini mempunyai tinggi dalam julat tersebut","Semua murid tinggi 165cm","Tiada murid pendek","Data tidak boleh ditafsir"], correct:0, explain:"Inferens munasabah berdasarkan kekerapan tertinggi." },
+  { level:"KBAT", id:"BK1", stem:"Seorang pelapor memotong paksi-y graf palang supaya perbezaan antara dua jenama kelihatan SANGAT besar walaupun sebenarnya kecil. Adakah ini beretika?", options:["Beretika, kerana data asal masih digunakan","TIDAK beretika — memotong paksi-y untuk membesar-besarkan perbezaan mengelirukan pembaca walaupun data 'asal' digunakan","Beretika, semua orang buat begitu","Tidak berkaitan dengan etika"], correct:1, explain:"Manipulasi visual sedemikian mengelirukan tafsiran walaupun data sebenar tidak diubah." },
+  { level:"KBAT", id:"BK2", stem:"Seorang murid mendakwa: \"Carta pai boleh digunakan untuk SEBARANG jenis data, termasuk data yang berubah mengikut masa.\" Betulkan kefahaman ini.", options:["Betul, carta pai sesuai untuk semua data", "Salah — carta pai sesuai untuk tunjuk PERKADARAN/PERATUSAN pada satu masa tertentu; untuk data berubah mengikut masa (trend), graf garis lebih sesuai", "Betul, kerana carta pai paling popular", "Tidak boleh ditentukan"], correct:1, explain:"Setiap jenis perwakilan data ada kesesuaian tersendiri; carta pai tidak sesuai untuk trend masa." }
+];
+
+// Tiket Keluar
+const exitQ = [
+  { id:"E1", stem:"Data numerik terbahagi kepada:", options:["diskret dan selanjar","kategori dan numerik","besar dan kecil","positif dan negatif"], correct:0, explain:"Dua jenis data numerik." },
+  { id:"E2", stem:"Graf garis sesuai untuk tunjukkan:", options:["trend mengikut masa","peratusan sahaja","kategori sahaja","hanya dua nilai"], correct:0, explain:"Graf garis untuk trend." },
+  { id:"E3", stem:"Memotong paksi-y untuk membesar-besarkan perbezaan adalah amalan:", options:["tidak beretika","beretika","digalakkan","wajib"], correct:0, explain:"Amalan mengelirukan yang perlu dielakkan." }
+];
+
+function logAnswer(logArray, record){ logArray.push(record); saveState(); }
+
+/* ---------- RENDER UTAMA ---------- */
+function render(){
+  const app = document.getElementById("app");
+  const screen = currentScreen();
+  let html = "";
+  switch(screen){
+    case "welcome": html = screenWelcome(); break;
+    case "identitas": html = screenIdentitas(); break;
+    case "objektif": html = screenObjektif(); break;
+    case "diagnostic": html = screenDiagnostic(); break;
+    case "notes": html = screenNotes(); break;
+    case "moduleMenu": html = screenModuleMenu(); break;
+    case "moduleA": html = screenModule("A", modA, "12.1.1 Soalan Statistik & Kumpul Data"); break;
+    case "moduleB": html = screenModule("B", modB, "12.1.2 Klasifikasi Data"); break;
+    case "moduleC": html = screenModule("C", modC, "12.1.3–12.1.4 Perwakilan Data"); break;
+    case "moduleD": html = screenModule("D", modD, "12.1.5 Tafsir & Inferens"); break;
+    case "moduleE": html = screenModule("E", modE, "12.1.6 Etika Perwakilan Data"); break;
+    case "bankIntro": html = screenBankIntro(); break;
+    case "bank": html = screenBank(); break;
+    case "exitTicket": html = screenExit(); break;
+    case "summary": html = screenSummary(); break;
+    case "confirmReset": html = screenConfirmReset(); break;
+    default: html = screenWelcome();
+  }
+  app.innerHTML = `<div class="version-badge">🔖 VERSI: ${VERSION}</div>` + html;
+}
+
+/* ---------- WELCOME ---------- */
+function screenWelcome(){
+  return `
+    <div style="padding-top:50px; text-align:center;">
+      <div class="pill">STUDIO BERITA</div>
+      <h1 style="margin-top:14px;">📊 Pengendalian Data</h1>
+      <p class="muted">Standard Kandungan 12.1<br>KSSM Matematik Tingkatan 1</p>
+      <div class="card" style="text-align:left; margin-top:24px;">
+        <h3>Apa yang menanti anda?</h3>
+        <p class="muted" style="margin-bottom:0;">Sebagai wartawan data, anda perlu mengumpul, mengorganisasi, dan mewakilkan data dengan JUJUR dan BERETIKA — kuasai kemahiran ini untuk melapor dengan tepat!</p>
+      </div>
+      <button class="btn btn-primary" onclick="goTo('identitas')">Mula Tugasan →</button>
+    </div>
+  `;
+}
+
+/* ---------- IDENTITAS ---------- */
+function screenIdentitas(){
+  return `
+    <div class="topbar"><button class="back" onclick="goBack()">← Kembali</button></div>
+    <h2>Sebelum bermula...</h2>
+    <p class="muted">Isikan maklumat anda untuk rekod prestasi.</p>
+    <div class="card">
+      <label for="inpName">Nama</label>
+      <input type="text" id="inpName" placeholder="Nama penuh" value="${escapeHtml(state.name)}">
+      <label for="inpKelas">Kelas</label>
+      <input type="text" id="inpKelas" placeholder="Contoh: 1 Cemerlang" value="${escapeHtml(state.kelas)}">
+    </div>
+    <button class="btn btn-primary" onclick="submitIdentitas()">Sedia! Mulakan →</button>
+  `;
+}
+function submitIdentitas(){
+  const n = document.getElementById("inpName").value.trim();
+  const k = document.getElementById("inpKelas").value.trim();
+  if(!n || !k){ alertInline("Sila isikan Nama dan Kelas sebelum meneruskan."); return; }
+  state.name=n; state.kelas=k;
+  if(!state.startTime){ state.startTime = Date.now(); }
+  saveState(); goTo("objektif");
+}
+function alertInline(msg){
+  const card = document.querySelector(".card");
+  let warn = document.getElementById("inlineWarn");
+  if(!warn){ warn=document.createElement("div"); warn.id="inlineWarn"; warn.className="feedback no"; card.appendChild(warn); }
+  warn.textContent = msg;
+}
+
+/* ---------- OBJEKTIF ---------- */
+function screenObjektif(){
+  return `
+    <div class="topbar"><button class="back" onclick="goBack()">← Kembali</button></div>
+    <h2>🎯 Taklimat Misi</h2>
+    <div class="card">
+      <h3>Objektif Pembelajaran</h3>
+      <div class="databox">1. Menjana soalan statistik dan mengumpul data yang relevan.</div>
+      <div class="databox">2. Mengklasifikasikan data kepada kategori/numerik dan membina jadual kekerapan.</div>
+      <div class="databox">3. Membina dan menukar pelbagai perwakilan data yang sesuai.</div>
+      <div class="databox">4. Mentafsir perwakilan data, termasuk membuat inferens/ramalan.</div>
+      <div class="databox">5. Membincangkan kepentingan mewakilkan data secara beretika.</div>
+    </div>
+    <div class="card">
+      <h3>Kriteria Kejayaan</h3>
+      <p class="muted" style="margin-bottom:0;">Selesaikan sekurang-kurangnya 8 daripada 10 soalan dalam Bank Soalan dengan betul, merangkumi semua aras kesukaran.</p>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('diagnostic')">Mula Semakan Awal →</button>
+  `;
+}
+
+/* ---------- SEMAKAN AWAL ---------- */
+const diagQ = [
+  { id:"DG1", stem:"Soalan statistik mesti ada:", options:["kebolehubahan data","jawapan tunggal","tiada data","hanya ya/tidak"], correct:0 },
+  { id:"DG2", stem:"Carta pai sesuai untuk tunjuk:", options:["peratusan/perkadaran","trend masa","taburan individu","hanya dua nilai"], correct:0 },
+  { id:"DG3", stem:"Data kategori ialah data yang:", options:["menerangkan ciri","sentiasa nombor","hanya diskret","hanya selanjar"], correct:0 }
+];
+function screenDiagnostic(){
+  const i = state.qIndex;
+  if(i >= diagQ.length){
+    return `<h2>✅ Semakan Awal Selesai</h2><p class="muted">Mari kukuhkan kefahaman dengan Nota Lengkap.</p><button class="btn btn-primary" onclick="goTo('notes')">Lihat Nota Lengkap →</button>`;
+  }
+  const q = diagQ[i];
+  return `
+    <div class="topbar"><span class="muted">Semakan Awal ${i+1}/${diagQ.length}</span></div>
+    <div class="progressbar"><div style="width:${(i/diagQ.length)*100}%"></div></div>
+    <div class="card"><h3>${q.stem}</h3><div>${q.options.map((o,idx)=>`<button class="btn-option" onclick="answerDiagnostic(${idx})">${o}</button>`).join("")}</div></div>
+  `;
+}
+function answerDiagnostic(idx){
+  const q = diagQ[state.qIndex];
+  const correct = idx===q.correct;
+  logAnswer(state.diagLog, { id:q.id, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:"Diagnostik" });
+  state.qIndex++; saveState(); render();
+}
+
+/* ---------- NOTA LENGKAP ---------- */
+function screenNotes(){
+  return `
+    <div class="topbar"><button class="back" onclick="goBack()">← Kembali</button></div>
+    <h2>📘 Nota Lengkap: Pengendalian Data</h2>
+    <div class="card">
+      <h3>1. Soalan Statistik</h3>
+      <p>Soalan statistik ialah soalan yang boleh dijawab dengan mengumpul data, dan data tersebut mempunyai KEBOLEHUBAHAN.</p>
+      <div class="databox">Contoh: "Berapakah tinggi purata murid dalam kelas?" (bukan "Berapakah 5+3?")</div>
+    </div>
+    <div class="card">
+      <h3>2. Jenis Data</h3>
+      <div class="databox">Data Kategori: warna, jantina, jenis makanan</div>
+      <div class="databox">Data Numerik Diskret: bilangan (boleh dikira, nilai bulat)</div>
+      <div class="databox">Data Numerik Selanjar: tinggi, berat, masa (sebarang nilai dalam julat)</div>
+    </div>
+    <div class="card">
+      <h3>3. Memilih Perwakilan Data yang Sesuai</h3>
+      <div class="databox">Carta Palang: bandingkan kekerapan antara kategori</div>
+      <div class="databox">Carta Pai: peratusan/perkadaran</div>
+      <div class="databox">Graf Garis: trend mengikut masa</div>
+      <div class="databox">Histogram: taburan data numerik berkumpulan</div>
+    </div>
+    <div class="card">
+      <h3>4. Etika dalam Perwakilan Data</h3>
+      <p><b>Contoh Lengkap:</b> Seorang pelapor memotong paksi-y untuk membesarkan perbezaan kecil.</p>
+      <div class="databox neg">Ini TIDAK BERETIKA — walaupun data asal digunakan, visual yang dimanipulasi mengelirukan pembaca.</div>
+      <p class="muted" style="margin-top:8px;"><b>⚠️ Miskonsepsi biasa:</b> "Carta pai sesuai untuk semua jenis data" — INI SALAH. Setiap perwakilan ada kesesuaian tersendiri mengikut jenis data.</p>
+    </div>
+    <div class="card">
+      <h3>📌 Rumusan Pantas</h3>
+      <div class="databox">• Soalan statistik: ada kebolehubahan data</div>
+      <div class="databox">• Pilih perwakilan data mengikut tujuan (kategori/trend/taburan)</div>
+      <div class="databox neg">• Elakkan manipulasi visual (skala, paksi dipotong)</div>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('moduleMenu')">Faham, Sedia untuk Latihan →</button>
+  `;
+}
+
+/* ---------- MENU MODUL ---------- */
+function screenModuleMenu(){
+  const items = [
+    {key:"A", label:"Modul A · Soalan Statistik & Data", sp:"12.1.1", screen:"moduleA"},
+    {key:"B", label:"Modul B · Klasifikasi Data", sp:"12.1.2", screen:"moduleB"},
+    {key:"C", label:"Modul C · Perwakilan Data", sp:"12.1.3–12.1.4", screen:"moduleC"},
+    {key:"D", label:"Modul D · Tafsir & Inferens", sp:"12.1.5", screen:"moduleD"},
+    {key:"E", label:"Modul E · Etika Data", sp:"12.1.6", screen:"moduleE"}
+  ];
+  const doneCount = Object.values(state.moduleDone).filter(Boolean).length;
+  const rows = items.map((it, idx)=>{
+    const done = state.moduleDone[it.key];
+    const prevDone = idx===0 ? true : state.moduleDone[items[idx-1].key];
+    const locked = !prevDone && !done;
+    return `<div class="module-row ${locked?'locked':''}" onclick="${locked? '': `openModule('${it.screen}')`}">
+      <div><div style="font-weight:700;">${it.label}</div><div class="muted" style="font-size:0.78rem;">SP ${it.sp}</div></div>
+      <div>${done ? "✅" : (locked ? "🔒" : "▶️")}</div>
+    </div>`;
+  }).join("");
+  return `
+    <div class="topbar"><span class="muted">Latihan Berpandu</span></div>
+    <h2>🧭 Peta Modul</h2>
+    <div class="progressbar"><div style="width:${(doneCount/5)*100}%"></div></div>
+    ${rows}
+    ${doneCount===5 ? `<button class="btn btn-primary" onclick="goTo('bankIntro')">Semua Modul Selesai — Teruskan →</button>` : `<p class="muted" style="text-align:center;">Selesaikan semua modul untuk buka Bank Soalan.</p>`}
+  `;
+}
+function openModule(screen){ state.qIndex=0; goTo(screen); }
+
+/* ---------- MODUL GENERIK ---------- */
+function getModuleData(key){
+  if(key==="A") return modA;
+  if(key==="B") return modB;
+  if(key==="C") return modC;
+  if(key==="D") return modD;
+  if(key==="E") return modE;
+  return [];
+}
+function screenModule(key, questions, title){
+  const i = state.qIndex;
+  if(i >= questions.length){
+    state.moduleDone[key] = true; saveState();
+    return `<h2>✅ ${title} — Selesai!</h2><p class="muted">Tahniah! Anda telah menguasai bahagian ini.</p><button class="btn btn-primary" onclick="goTo('moduleMenu')">Kembali ke Peta Modul →</button>`;
+  }
+  const q = questions[i];
+  return `
+    <div class="topbar"><button class="back" onclick="goTo('moduleMenu')">← Peta Modul</button></div>
+    <h3>${title}</h3>
+    <div class="progressbar"><div style="width:${(i/questions.length)*100}%"></div></div>
+    <div class="card">
+      <p style="font-weight:600;">${q.stem}</p>
+      <div>${q.options.map((o,idx)=>`<button class="btn-option" id="opt-${q.id}-${idx}" onclick="answerModule('${key}', '${q.id}', ${idx})">${o}</button>`).join("")}</div>
+      <div id="fb-${q.id}"></div>
+    </div>
+  `;
+}
+function answerModule(key, qid, idx){
+  const questions = getModuleData(key);
+  const q = questions.find(x=>x.id===qid);
+  if(!q || q._answered) return;
+  q._answered = true;
+  const correct = idx === q.correct;
+  q.options.forEach((o,oi)=>{
+    const btn = document.getElementById(`opt-${qid}-${oi}`);
+    btn.classList.add("disabled");
+    if(oi===q.correct) btn.classList.add("correct");
+    else if(oi===idx) btn.classList.add("wrong");
+  });
+  const fb = document.getElementById(`fb-${qid}`);
+  fb.className = "feedback " + (correct ? "ok" : "no");
+  fb.innerHTML = (correct ? "✅ Betul! " : "❌ Belum tepat. ") + q.explain;
+  fb.insertAdjacentHTML("afterend", `<button class="btn btn-primary" onclick="advanceModule('${key}')">Seterusnya →</button>`);
+  logAnswer(state.practiceLog, { id:q.id, module:key, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:"Latihan Berpandu" });
+}
+function advanceModule(key){ getModuleData(key).forEach(q=>{ q._answered=false; }); state.qIndex++; saveState(); render(); }
+
+/* ---------- BANK SOALAN ---------- */
+function screenBankIntro(){
+  return `
+    <h2>🏆 Bank Soalan 4 Aras</h2>
+    <div class="card">
+      <p>8 soalan merentasi 4 aras kesukaran:</p>
+      <div class="databox"><span class="badge-level lvl-rendah">RENDAH</span> Ingat & kenal pasti fakta asas</div>
+      <div class="databox"><span class="badge-level lvl-sederhana">SEDERHANA</span> Aplikasi prosedur biasa</div>
+      <div class="databox"><span class="badge-level lvl-tinggi">TINGGI</span> Analisis & multi-langkah</div>
+      <div class="databox"><span class="badge-level lvl-kbat">KBAT</span> Penaakulan & konteks sebenar</div>
+      <p class="muted" style="margin-bottom:0;">Jika tersilap pada aras Tinggi/KBAT, petunjuk akan diberikan.</p>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('bank', true)">Mula Bank Soalan →</button>
+  `;
+}
+function screenBank(){
+  const i = state.qIndex;
+  if(i >= bank.length){
+    return `<h2>✅ Bank Soalan Selesai</h2><p class="muted">Bersedia untuk cabaran akhir?</p><button class="btn btn-primary" onclick="goTo('exitTicket', true)">Ke Tiket Keluar →</button>`;
+  }
+  const q = bank[i];
+  const lvlClass = {"Rendah":"lvl-rendah","Sederhana":"lvl-sederhana","Tinggi":"lvl-tinggi","KBAT":"lvl-kbat"}[q.level];
+  return `
+    <div class="topbar"><span class="muted">Soalan ${i+1}/${bank.length}</span></div>
+    <div class="progressbar"><div style="width:${(i/bank.length)*100}%"></div></div>
+    <div class="card">
+      <span class="badge-level ${lvlClass}">${q.level}</span>
+      <p style="font-weight:600;">${q.stem}</p>
+      <div>${q.options.map((o,idx)=>`<button class="btn-option" id="optBank-${idx}" onclick="answerBank(${idx})">${o}</button>`).join("")}</div>
+      <div id="fbBank"></div>
+      <div id="hintBank"></div>
+    </div>
+  `;
+}
+function answerBank(idx){
+  const i = state.qIndex;
+  const q = bank[i];
+  if(q._answered) return;
+  const correct = idx === q.correct;
+  const needsScaffold = !correct && (q.level==="Tinggi" || q.level==="KBAT") && !q._hinted;
+  if(needsScaffold){
+    q._hinted = true; state.hintsUsedTotal++; saveState();
+    document.getElementById("hintBank").innerHTML = `<div class="hint-box">💡 Petunjuk: Fikirkan tujuan perwakilan data (bandingkan kategori? tunjuk trend? peratusan?) sebelum memilih jenis carta.</div>`;
+    return;
+  }
+  q._answered = true;
+  q.options.forEach((o,oi)=>{
+    const btn = document.getElementById(`optBank-${oi}`);
+    btn.classList.add("disabled");
+    if(oi===q.correct) btn.classList.add("correct");
+    else if(oi===idx) btn.classList.add("wrong");
+  });
+  const fb = document.getElementById("fbBank");
+  fb.className = "feedback " + (correct ? "ok" : "no");
+  fb.innerHTML = (correct ? "✅ Betul! " : "❌ Belum tepat. ") + q.explain;
+  fb.insertAdjacentHTML("afterend", `<button class="btn btn-primary" onclick="advanceBank()">Seterusnya →</button>`);
+  logAnswer(state.bankLog, { id:q.id, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:q.level });
+}
+function advanceBank(){ state.qIndex++; saveState(); render(); }
+
+/* ---------- TIKET KELUAR ---------- */
+function screenExit(){
+  const i = state.qIndex;
+  if(i >= exitQ.length){
+    state.endTime = Date.now(); saveState();
+    return `<h2>🎉 Tugasan Studio Berita Selesai!</h2><p class="muted">Tekan butang di bawah untuk lihat Ringkasan penuh.</p><button class="btn btn-gold" onclick="goTo('summary')">Lihat Ringkasan →</button>`;
+  }
+  const q = exitQ[i];
+  return `
+    <div class="topbar"><span class="muted">Tiket Keluar ${i+1}/${exitQ.length}</span></div>
+    <div class="progressbar"><div style="width:${(i/exitQ.length)*100}%"></div></div>
+    <div class="card">
+      <p style="font-weight:600;">${q.stem}</p>
+      <div>${q.options.map((o,idx)=>`<button class="btn-option" id="optExit-${idx}" onclick="answerExit(${idx})">${o}</button>`).join("")}</div>
+      <div id="fbExit"></div>
+    </div>
+  `;
+}
+function answerExit(idx){
+  const i = state.qIndex;
+  const q = exitQ[i];
+  if(q._answered) return;
+  q._answered = true;
+  const correct = idx === q.correct;
+  q.options.forEach((o,oi)=>{
+    const btn = document.getElementById(`optExit-${oi}`);
+    btn.classList.add("disabled");
+    if(oi===q.correct) btn.classList.add("correct");
+    else if(oi===idx) btn.classList.add("wrong");
+  });
+  const fb = document.getElementById("fbExit");
+  fb.className = "feedback " + (correct ? "ok" : "no");
+  fb.innerHTML = (correct ? "✅ Betul! " : "❌ Belum tepat. ") + q.explain;
+  fb.insertAdjacentHTML("afterend", `<button class="btn btn-primary" onclick="advanceExit()">Seterusnya →</button>`);
+  logAnswer(state.exitLog, { id:q.id, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:"Tiket Keluar" });
+}
+function advanceExit(){ state.qIndex++; saveState(); render(); }
+
+/* ---------- RINGKASAN ---------- */
+function allLogs(){ return [].concat(state.diagLog, state.practiceLog, state.bankLog, state.exitLog); }
+function screenSummary(){
+  const logs = allLogs();
+  const gradedLogs = [].concat(state.practiceLog, state.bankLog, state.exitLog);
+  const totalCorrect = gradedLogs.filter(l=>l.correct).length;
+  const totalQ = gradedLogs.length;
+  const pct = totalQ ? Math.round((totalCorrect/totalQ)*100) : 0;
+  let masteryLabel = "Tahap 1 — Asas";
+  if(pct>=80) masteryLabel = "Tahap 3 — Cemerlang 📊";
+  else if(pct>=60) masteryLabel = "Tahap 2 — Baik";
+  const durationSec = state.endTime && state.startTime ? Math.round((state.endTime-state.startTime)/1000) : 0;
+  const mins = Math.floor(durationSec/60), secs = durationSec%60;
+  const listItems = logs.map(l=>{
+    return `<div class="scoreitem">
+      <div>${l.level ? `<span class="muted">[${l.level}]</span> ` : ""}${escapeHtml(l.question)}</div>
+      <div>${l.correct ? '<span class="ok-tag">✔ Betul</span>' : '<span class="no-tag">✘ Salah</span>'} — Jawapan anda: <b>${escapeHtml(l.chosen)}</b>${l.correct ? "" : ` | Jawapan betul: <b>${escapeHtml(l.correctAns)}</b>`}</div>
+    </div>`;
+  }).join("");
+  return `
+    <h2>📋 Ringkasan Studio Berita</h2>
+    <div class="card">
+      <p style="margin-bottom:4px;"><b>Nama:</b> ${escapeHtml(state.name)}</p>
+      <p style="margin-bottom:0;"><b>Kelas:</b> ${escapeHtml(state.kelas)}</p>
+    </div>
+    <div class="statrow">
+      <div class="statbox"><div class="num">${totalCorrect}/${totalQ}</div><div class="lbl">Markah</div></div>
+      <div class="statbox"><div class="num">${pct}%</div><div class="lbl">Peratus</div></div>
+      <div class="statbox"><div class="num">${mins}m ${secs}s</div><div class="lbl">Masa</div></div>
+    </div>
+    <div class="card" style="text-align:center;"><div class="pill" style="font-size:0.85rem;">${masteryLabel}</div></div>
+    <h3>Log Jawapan Terperinci</h3>
+    <div class="scorelist">${listItems}</div>
+    <button class="btn btn-ghost" onclick="goTo('confirmReset')">🔄 Set Semula & Cuba Lagi</button>
+    <p class="footer-note">SK 12.1 Pengendalian Data · KSSM Matematik Tingkatan 1 · ${VERSION}<br>Sila tangkap skrin ini untuk dihantar kepada guru.</p>
+  `;
+}
+
+/* ---------- RESET ---------- */
+function screenConfirmReset(){
+  return `
+    <h2>⚠️ Sahkan Set Semula</h2>
+    <div class="card"><p>Tindakan ini akan memadam semua rekod jawapan dan markah anda untuk permulaan baharu. Tindakan ini tidak boleh diundur.</p></div>
+    <button class="btn btn-primary" style="background:var(--negative);" onclick="doReset()">Ya, Padam & Mula Semula</button>
+    <button class="btn btn-ghost" onclick="goBack()">Batal, Kembali</button>
+  `;
+}
+function doReset(){ localStorage.removeItem(STORAGE_KEY); state = freshState(); render(); }
+
+/* ---------- UTIL ---------- */
+function escapeHtml(str){
+  if(str === undefined || str === null) return "";
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+/* ---------- MULA ---------- */
+render();
+</script>
+</body>
+</html>

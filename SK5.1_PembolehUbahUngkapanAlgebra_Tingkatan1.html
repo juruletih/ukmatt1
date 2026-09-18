@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Studio Rahsia: Pemboleh Ubah & Ungkapan | SK 5.1</title>
+<style>
+  :root{
+    --bg: #0d1420; --bg-alt: #131e2f; --surface: #192a40; --surface-2: #1f334d;
+    --border: #2f4a68; --text: #eaf1fb; --muted: #9db3ce;
+    --positive: #38bdf8; --positive-dark: #1a6f8f;
+    --negative: #fb7185; --negative-dark: #b8324a;
+    --gold: #f4b942; --radius: 14px; --maxw: 560px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: radial-gradient(ellipse at top, #17273e 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh; display:flex; justify-content:center; line-height:1.5;
+  }
+  #app{ width:100%; max-width: var(--maxw); min-height:100vh; padding: 18px 18px 40px; position:relative; }
+  h1,h2,h3{ margin:0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+  h1{ font-size:1.5rem; } h2{ font-size:1.2rem; } h3{ font-size:1.02rem; }
+  p{ margin:0 0 12px; color: var(--text); }
+  .muted{ color: var(--muted); font-size:0.9rem; }
+  .card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:16px; margin-bottom:14px; }
+  .pill{ display:inline-block; padding:3px 10px; border-radius:999px; font-size:0.72rem; font-weight:700; letter-spacing:0.02em; background: var(--surface-2); color: var(--gold); border:1px solid var(--border); }
+  .btn{ display:block; width:100%; padding:14px 16px; border-radius: 12px; border:none; font-size:1rem; font-weight:700; cursor:pointer; margin-top:10px; -webkit-tap-highlight-color: transparent; }
+  .btn:active{ transform: scale(0.98); }
+  .btn-primary{ background: var(--positive); color:#03202c; }
+  .btn-ghost{ background: transparent; color: var(--muted); border:1px solid var(--border); }
+  .btn-gold{ background: var(--gold); color:#3a2600; }
+  .btn-option{ display:block; width:100%; text-align:left; background: var(--surface-2); color: var(--text); border:1px solid var(--border); border-radius:12px; padding:13px 14px; margin-top:9px; font-size:0.98rem; cursor:pointer; }
+  .btn-option.correct{ background: var(--positive-dark); border-color: var(--positive); }
+  .btn-option.wrong{ background: var(--negative-dark); border-color: var(--negative); }
+  .btn-option.disabled{ pointer-events:none; opacity:0.85; }
+  input[type=text]{ width:100%; padding:13px 14px; border-radius:12px; border:1px solid var(--border); background: var(--surface-2); color: var(--text); font-size:1rem; margin-bottom:6px; }
+  label{ font-size:0.85rem; color: var(--muted); display:block; margin-bottom:5px; margin-top:10px; }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:10px; }
+  .topbar .back{ background:none; border:none; color: var(--muted); font-size:0.95rem; cursor:pointer; padding:6px 0; }
+  .progressbar{ width:100%; height:8px; background: var(--surface-2); border-radius:999px; overflow:hidden; margin: 8px 0 16px; }
+  .progressbar > div{ height:100%; background: linear-gradient(90deg, var(--positive), var(--gold)); }
+  .databox{ background: var(--bg-alt); border-left:4px solid var(--gold); border-radius:8px; padding:12px 14px; margin:10px 0; font-size:0.95rem; }
+  .databox.neg{ border-left-color: var(--negative); }
+  .databox.pos{ border-left-color: var(--positive); }
+  .feedback{ border-radius:10px; padding:12px 14px; margin-top:10px; font-size:0.92rem; font-weight:600; }
+  .feedback.ok{ background: rgba(56,189,248,0.15); color: var(--positive); border:1px solid var(--positive); }
+  .feedback.no{ background: rgba(251,113,133,0.15); color: var(--negative); border:1px solid var(--negative); }
+  .hint-box{ background: var(--surface-2); border:1px dashed var(--gold); border-radius:10px; padding:10px 12px; margin-top:8px; font-size:0.88rem; color: var(--gold); }
+  .badge-level{ display:inline-block; font-size:0.68rem; font-weight:800; letter-spacing:0.03em; padding:2px 8px; border-radius:6px; margin-bottom:8px; }
+  .lvl-rendah{ background:#264d3a; color:#7be0a8; }
+  .lvl-sederhana{ background:#2a4763; color:#7fc4f7; }
+  .lvl-tinggi{ background:#5a3a1f; color:#f7b563; }
+  .lvl-kbat{ background:#4a2338; color:#f78fc0; }
+  .statrow{ display:flex; gap:10px; margin-bottom:14px; }
+  .statbox{ flex:1; background: var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px; text-align:center; }
+  .statbox .num{ font-size:1.3rem; font-weight:800; color: var(--gold); }
+  .statbox .lbl{ font-size:0.7rem; color: var(--muted); }
+  .scorelist{ max-height:340px; overflow-y:auto; border:1px solid var(--border); border-radius:12px; }
+  .scoreitem{ padding:10px 12px; border-bottom:1px solid var(--border); font-size:0.85rem; }
+  .scoreitem:last-child{ border-bottom:none; }
+  .scoreitem .ok-tag{ color: var(--positive); font-weight:700; }
+  .scoreitem .no-tag{ color: var(--negative); font-weight:700; }
+  .version-badge{ position:absolute; top:10px; right:10px; font-size:0.62rem; background: var(--surface-2); color: var(--muted); border:1px solid var(--border); padding:3px 7px; border-radius:6px; }
+  .module-row{ display:flex; align-items:center; justify-content:space-between; background: var(--surface); border:1px solid var(--border); border-radius:12px; padding:13px 14px; margin-bottom:10px; cursor:pointer; }
+  .module-row.locked{ opacity:0.45; cursor:not-allowed; }
+  .footer-note{ text-align:center; font-size:0.72rem; color: var(--muted); margin-top:24px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* =========================================================
+   STUDIO RAHSIA: Pemboleh Ubah & Ungkapan Algebra
+   SK 5.1 | KSSM Matematik Tingkatan 1
+   VERSI v1.0
+   ========================================================= */
+const VERSION = "v1.0";
+const STORAGE_KEY = "studio_rahsia_sk51_state";
+
+function freshState(){
+  return {
+    path:["welcome"], name:"", kelas:"", startTime:null, endTime:null,
+    diagLog:[], practiceLog:[], bankLog:[], exitLog:[],
+    moduleDone:{ A:false,B:false,C:false,D:false,E:false }, moduleIndex:0, qIndex:0,
+    hintsUsedTotal:0, version: VERSION
+  };
+}
+let state = loadState();
+function loadState(){
+  try{
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if(!saved) return freshState();
+    return Object.assign(freshState(), JSON.parse(saved));
+  }catch(e){ return freshState(); }
+}
+function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+function goTo(screen, resetSub){ if(resetSub){ state.qIndex=0; } state.path.push(screen); saveState(); render(); }
+function goBack(){ if(state.path.length>1){ state.path.pop(); } saveState(); render(); }
+function currentScreen(){ return state.path[state.path.length-1]; }
+
+/* ---------- DATA SOALAN ---------- */
+
+// Modul A — 5.1.1 Huruf sebagai pemboleh ubah, tetap/berubah
+const modA = [
+  { id:"A1", stem:"Encik Ali mempunyai x ekor ayam. Nilai x akan BERUBAH apabila:", options:["dia menjual atau membeli lebih ayam","dia menamakan ayam-ayamnya","dia mengira semula tanpa sebarang perubahan","tiada perubahan berlaku langsung"], correct:0, explain:"x ialah pemboleh ubah — nilainya berubah mengikut situasi sebenar, iaitu apabila bilangan ayam berubah." },
+  { id:"A2", stem:"Dalam ungkapan 'kos = 5n' (n=bilangan buku), n mewakili:", options:["kuantiti tidak diketahui yang berubah mengikut situasi","nilai tetap 5","kos tetap","tiada makna khusus"], correct:0, explain:"n ialah pemboleh ubah mewakili bilangan buku, yang boleh berubah." },
+  { id:"A3", stem:"Yang manakah PEMBOLEH UBAH (nilai berubah mengikut situasi)?", options:["n dalam bilangan buku dibeli","π (pi) ≈ 3.142","angka 100 dalam peratus","nilai 0 dalam operasi tambah"], correct:0, explain:"n berubah mengikut bilangan buku dibeli — ini pemboleh ubah. π ialah nilai malar (tetap)." }
+];
+
+// Modul B — 5.1.2 Terbit ungkapan algebra drpd ungkapan aritmetik
+const modB = [
+  { id:"B1", stem:"Harga seunit pen ialah RM2. Jika dibeli n batang pen, ungkapan algebra bagi jumlah harga ialah:", options:["2n","n+2","2/n","n−2"], correct:0, explain:"Jumlah harga = harga seunit × bilangan = 2×n = 2n." },
+  { id:"B2", stem:"Umur Ali ialah y tahun. 5 tahun akan datang, umurnya ialah:", options:["y+5","5y","y−5","5−y"], correct:0, explain:"Umur akan datang = umur sekarang + 5 = y+5." },
+  { id:"B3", stem:"Sebuah kotak mengandungi k biji epal. Jumlah epal dalam 3 kotak ialah:", options:["3k","k+3","k/3","k−3"], correct:0, explain:"Jumlah = bilangan kotak × kandungan seunit = 3×k = 3k." }
+];
+
+// Modul C — 5.1.3 Nilai ungkapan bila pemboleh ubah diberi
+const modC = [
+  { id:"C1", stem:"Jika x=4, cari nilai 3x+2.", options:["14","9","20","12"], correct:0, explain:"3(4)+2=12+2=14." },
+  { id:"C2", stem:"Jika a=5, cari nilai 2a².", options:["50","20","100","10"], correct:0, explain:"2(5²)=2(25)=50." },
+  { id:"C3", stem:"Jika p=3 dan q=2, cari nilai 4p−q.", options:["10","14","6","5"], correct:0, explain:"4(3)−2=12−2=10." }
+];
+
+// Modul D — 5.1.4 Kenal sebutan & pekali
+const modD = [
+  { id:"D1", stem:"Dalam ungkapan 5x+3y−7, berapakah bilangan SEBUTAN?", options:["3 sebutan (5x, 3y, −7)","2 sebutan","1 sebutan","4 sebutan"], correct:0, explain:"Sebutan dipisahkan oleh tanda +/−: 5x, 3y, dan −7 — jumlah 3 sebutan." },
+  { id:"D2", stem:"Pekali bagi x dalam ungkapan 7x−4 ialah:", options:["7","−4","x","−7"], correct:0, explain:"Pekali ialah nombor yang mendahului pemboleh ubah: 7." },
+  { id:"D3", stem:"Dalam ungkapan −3y+2, pekali bagi y ialah:", options:["−3","2","y","3"], correct:0, explain:"Pekali bagi y ialah −3 (termasuk tandanya)." }
+];
+
+// Modul E — 5.1.5 Sebutan serupa & tidak serupa
+const modE = [
+  { id:"E1", stem:"Antara berikut, manakah SEBUTAN SERUPA dengan 3x?", options:["7x","3y","x²","3"], correct:0, explain:"Sebutan serupa mesti ada pemboleh ubah sama (x) dengan kuasa sama (kuasa 1): 7x." },
+  { id:"E2", stem:"Antara berikut, manakah SEBUTAN TIDAK SERUPA dengan 5y?", options:["2x","10y","−3y","5y"], correct:0, explain:"2x mempunyai pemboleh ubah berbeza (x, bukan y), jadi TIDAK serupa." },
+  { id:"E3", stem:"Dua sebutan dikatakan SERUPA jika:", options:["mempunyai pemboleh ubah yang sama dengan kuasa yang sama","mempunyai pekali yang sama","mempunyai tanda yang sama","mempunyai nilai yang sama"], correct:0, explain:"Sebutan serupa ditentukan oleh pemboleh ubah DAN kuasanya, bukan pekali." }
+];
+
+// Bank Soalan 4 Aras
+const bank = [
+  { level:"Rendah", id:"BR1", stem:"Pekali bagi x dalam 6x ialah:", options:["6","x","1","0"], correct:0, explain:"Pekali ialah nombor mendahului pemboleh ubah: 6." },
+  { level:"Rendah", id:"BR2", stem:"Sebutan serupa dengan 4a ialah:", options:["9a","4b","a²","4"], correct:0, explain:"9a ada pemboleh ubah sama (a) dengan kuasa sama." },
+  { level:"Sederhana", id:"BS1", stem:"Jika x=2, cari nilai 5x−3.", options:["7","10","13","4"], correct:0, explain:"5(2)−3=10−3=7." },
+  { level:"Sederhana", id:"BS2", stem:"Terbitkan ungkapan: kos n biji buku pada RM3 seunit.", options:["3n","n+3","3/n","n−3"], correct:0, explain:"Kos = harga seunit × bilangan = 3n." },
+  { level:"Tinggi", id:"BT1", stem:"Jika a=3, b=2, cari nilai 2a²−3b.", options:["12","6","18","0"], correct:0, explain:"2(9)−3(2)=18−6=12." },
+  { level:"Tinggi", id:"BT2", stem:"Dalam ungkapan 4x+7y−2x+3, kenal pasti sebutan yang SERUPA dengan 4x.", options:["−2x","7y","3","4x dan 7y"], correct:0, explain:"−2x ada pemboleh ubah sama (x) dengan kuasa sama, jadi serupa dengan 4x." },
+  { level:"KBAT", id:"BK1", stem:"Seorang murid mendakwa: \"3x dan 3y adalah sebutan serupa kerana kedua-duanya ada pekali 3.\" Betulkan kefahaman ini.", options:["Betul","Salah — sebutan serupa mesti mempunyai PEMBOLEH UBAH yang SAMA (bukan pekali sama); x dan y adalah pemboleh ubah berbeza, jadi 3x dan 3y TIDAK serupa","Betul, kerana nombor sama","Tidak berkaitan langsung"], correct:1, explain:"Sebutan serupa ditentukan oleh pemboleh ubah dan kuasa, BUKAN pekali. 3x dan 3y ada pemboleh ubah berbeza." },
+  { level:"KBAT", id:"BK2", stem:"Panjang sebuah segi empat tepat ialah (x+3) cm dan lebar ialah x cm. Jika x=4, cari LUAS segi empat tepat tersebut.", options:["28 cm²","16 cm²","12 cm²","7 cm²"], correct:0, explain:"Luas=(x+3)(x)=(4+3)(4)=7×4=28cm²." }
+];
+
+// Tiket Keluar
+const exitQ = [
+  { id:"E1", stem:"Pekali bagi y dalam −8y ialah:", options:["−8","8","y","0"], correct:0, explain:"Pekali=−8." },
+  { id:"E2", stem:"Jika x=5, cari nilai 3x+1.", options:["16","15","8","4"], correct:0, explain:"3(5)+1=16." },
+  { id:"E3", stem:"Sebutan serupa dengan −2m ialah:", options:["9m","−2n","m²","−2"], correct:0, explain:"9m ada pemboleh ubah sama (m)." }
+];
+
+function logAnswer(logArray, record){ logArray.push(record); saveState(); }
+
+/* ---------- RENDER UTAMA ---------- */
+function render(){
+  const app = document.getElementById("app");
+  const screen = currentScreen();
+  let html = "";
+  switch(screen){
+    case "welcome": html = screenWelcome(); break;
+    case "identitas": html = screenIdentitas(); break;
+    case "objektif": html = screenObjektif(); break;
+    case "diagnostic": html = screenDiagnostic(); break;
+    case "notes": html = screenNotes(); break;
+    case "moduleMenu": html = screenModuleMenu(); break;
+    case "moduleA": html = screenModule("A", modA, "5.1.1 Pemboleh Ubah: Tetap/Berubah"); break;
+    case "moduleB": html = screenModule("B", modB, "5.1.2 Terbit Ungkapan Algebra"); break;
+    case "moduleC": html = screenModule("C", modC, "5.1.3 Nilai Ungkapan Algebra"); break;
+    case "moduleD": html = screenModule("D", modD, "5.1.4 Sebutan & Pekali"); break;
+    case "moduleE": html = screenModule("E", modE, "5.1.5 Sebutan Serupa & Tidak Serupa"); break;
+    case "bankIntro": html = screenBankIntro(); break;
+    case "bank": html = screenBank(); break;
+    case "exitTicket": html = screenExit(); break;
+    case "summary": html = screenSummary(); break;
+    case "confirmReset": html = screenConfirmReset(); break;
+    default: html = screenWelcome();
+  }
+  app.innerHTML = `<div class="version-badge">🔖 VERSI: ${VERSION}</div>` + html;
+}
+
+/* ---------- WELCOME ---------- */
+function screenWelcome(){
+  return `
+    <div style="padding-top:50px; text-align:center;">
+      <div class="pill">STUDIO RAHSIA</div>
+      <h1 style="margin-top:14px;">🔤 Pemboleh Ubah & Ungkapan</h1>
+      <p class="muted">Standard Kandungan 5.1<br>KSSM Matematik Tingkatan 1</p>
+      <div class="card" style="text-align:left; margin-top:24px;">
+        <h3>Apa yang menanti anda?</h3>
+        <p class="muted" style="margin-bottom:0;">Huruf boleh menyimpan rahsia nombor! Kuasai penggunaan pemboleh ubah untuk mewakili kuantiti yang tidak diketahui dalam kehidupan sebenar.</p>
+      </div>
+      <button class="btn btn-primary" onclick="goTo('identitas')">Mula Tugasan →</button>
+    </div>
+  `;
+}
+
+/* ---------- IDENTITAS ---------- */
+function screenIdentitas(){
+  return `
+    <div class="topbar"><button class="back" onclick="goBack()">← Kembali</button></div>
+    <h2>Sebelum bermula...</h2>
+    <p class="muted">Isikan maklumat anda untuk rekod prestasi.</p>
+    <div class="card">
+      <label for="inpName">Nama</label>
+      <input type="text" id="inpName" placeholder="Nama penuh" value="${escapeHtml(state.name)}">
+      <label for="inpKelas">Kelas</label>
+      <input type="text" id="inpKelas" placeholder="Contoh: 1 Cemerlang" value="${escapeHtml(state.kelas)}">
+    </div>
+    <button class="btn btn-primary" onclick="submitIdentitas()">Sedia! Mulakan →</button>
+  `;
+}
+function submitIdentitas(){
+  const n = document.getElementById("inpName").value.trim();
+  const k = document.getElementById("inpKelas").value.trim();
+  if(!n || !k){ alertInline("Sila isikan Nama dan Kelas sebelum meneruskan."); return; }
+  state.name=n; state.kelas=k;
+  if(!state.startTime){ state.startTime = Date.now(); }
+  saveState(); goTo("objektif");
+}
+function alertInline(msg){
+  const card = document.querySelector(".card");
+  let warn = document.getElementById("inlineWarn");
+  if(!warn){ warn=document.createElement("div"); warn.id="inlineWarn"; warn.className="feedback no"; card.appendChild(warn); }
+  warn.textContent = msg;
+}
+
+/* ---------- OBJEKTIF ---------- */
+function screenObjektif(){
+  return `
+    <div class="topbar"><button class="back" onclick="goBack()">← Kembali</button></div>
+    <h2>🎯 Taklimat Misi</h2>
+    <div class="card">
+      <h3>Objektif Pembelajaran</h3>
+      <div class="databox">1. Menggunakan huruf mewakili kuantiti tidak diketahui; nyatakan sama ada tetap/berubah.</div>
+      <div class="databox">2. Menerbitkan ungkapan algebra daripada ungkapan aritmetik.</div>
+      <div class="databox">3. Menentukan nilai ungkapan algebra apabila nilai pemboleh ubah diberi.</div>
+      <div class="databox">4. Mengenal pasti sebutan dan pekali dalam ungkapan algebra.</div>
+      <div class="databox">5. Mengenal pasti sebutan serupa dan tidak serupa.</div>
+    </div>
+    <div class="card">
+      <h3>Kriteria Kejayaan</h3>
+      <p class="muted" style="margin-bottom:0;">Selesaikan sekurang-kurangnya 8 daripada 10 soalan dalam Bank Soalan dengan betul, merangkumi semua aras kesukaran.</p>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('diagnostic')">Mula Semakan Awal →</button>
+  `;
+}
+
+/* ---------- SEMAKAN AWAL ---------- */
+const diagQ = [
+  { id:"DG1", stem:"Pekali bagi x dalam 4x ialah:", options:["4","x","1","0"], correct:0 },
+  { id:"DG2", stem:"Jika x=3, cari 2x+1.", options:["7","6","5","9"], correct:0 },
+  { id:"DG3", stem:"Sebutan serupa dengan 5a ialah:", options:["10a","5b","a²","5"], correct:0 }
+];
+function screenDiagnostic(){
+  const i = state.qIndex;
+  if(i >= diagQ.length){
+    return `<h2>✅ Semakan Awal Selesai</h2><p class="muted">Mari kukuhkan kefahaman dengan Nota Lengkap.</p><button class="btn btn-primary" onclick="goTo('notes')">Lihat Nota Lengkap →</button>`;
+  }
+  const q = diagQ[i];
+  return `
+    <div class="topbar"><span class="muted">Semakan Awal ${i+1}/${diagQ.length}</span></div>
+    <div class="progressbar"><div style="width:${(i/diagQ.length)*100}%"></div></div>
+    <div class="card"><h3>${q.stem}</h3><div>${q.options.map((o,idx)=>`<button class="btn-option" onclick="answerDiagnostic(${idx})">${o}</button>`).join("")}</div></div>
+  `;
+}
+function answerDiagnostic(idx){
+  const q = diagQ[state.qIndex];
+  const correct = idx===q.correct;
+  logAnswer(state.diagLog, { id:q.id, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:"Diagnostik" });
+  state.qIndex++; saveState(); render();
+}
+
+/* ---------- NOTA LENGKAP ---------- */
+function screenNotes(){
+  return `
+    <div class="topbar"><button class="back" onclick="goBack()">← Kembali</button></div>
+    <h2>📘 Nota Lengkap: Pemboleh Ubah & Ungkapan</h2>
+    <div class="card">
+      <h3>1. Pemboleh Ubah</h3>
+      <p>Huruf digunakan untuk mewakili kuantiti yang TIDAK DIKETAHUI atau BERUBAH-UBAH nilainya.</p>
+      <div class="databox">Contoh: n = bilangan buku (boleh berubah mengikut situasi)</div>
+    </div>
+    <div class="card">
+      <h3>2. Menerbitkan Ungkapan Algebra</h3>
+      <p><b>Contoh Lengkap:</b> Harga seunit pen RM2, dibeli n batang. Terbitkan ungkapan jumlah harga.</p>
+      <div class="databox">Ungkapan aritmetik: harga seunit × bilangan</div>
+      <div class="databox">Ungkapan algebra: 2 × n = 2n</div>
+    </div>
+    <div class="card">
+      <h3>3. Nilai Ungkapan Algebra</h3>
+      <p><b>Contoh Lengkap:</b> Jika x=4, cari nilai 3x+2.</p>
+      <div class="databox">Langkah 1: Gantikan x dengan 4: 3(4)+2</div>
+      <div class="databox">Langkah 2: Kira: 12+2=14</div>
+    </div>
+    <div class="card">
+      <h3>4. Sebutan, Pekali & Sebutan Serupa</h3>
+      <div class="databox">Ungkapan 5x+3y−7 ada 3 SEBUTAN: 5x, 3y, −7</div>
+      <div class="databox">PEKALI bagi x dalam 5x ialah 5</div>
+      <div class="databox pos">SEBUTAN SERUPA: pemboleh ubah SAMA dengan kuasa SAMA (cth: 3x dan 7x)</div>
+      <p class="muted" style="margin-top:8px;"><b>⚠️ Miskonsepsi biasa:</b> "3x dan 3y serupa kerana pekali sama" — INI SALAH. Sebutan serupa ditentukan oleh PEMBOLEH UBAH, bukan pekali.</p>
+    </div>
+    <div class="card">
+      <h3>📌 Rumusan Pantas</h3>
+      <div class="databox">• Pemboleh ubah = huruf mewakili kuantiti tidak diketahui/berubah</div>
+      <div class="databox">• Nilai ungkapan: gantikan pemboleh ubah dengan nilai diberi</div>
+      <div class="databox">• Sebutan serupa: pemboleh ubah SAMA + kuasa SAMA</div>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('moduleMenu')">Faham, Sedia untuk Latihan →</button>
+  `;
+}
+
+/* ---------- MENU MODUL ---------- */
+function screenModuleMenu(){
+  const items = [
+    {key:"A", label:"Modul A · Tetap/Berubah", sp:"5.1.1", screen:"moduleA"},
+    {key:"B", label:"Modul B · Terbit Ungkapan", sp:"5.1.2", screen:"moduleB"},
+    {key:"C", label:"Modul C · Nilai Ungkapan", sp:"5.1.3", screen:"moduleC"},
+    {key:"D", label:"Modul D · Sebutan & Pekali", sp:"5.1.4", screen:"moduleD"},
+    {key:"E", label:"Modul E · Sebutan Serupa", sp:"5.1.5", screen:"moduleE"}
+  ];
+  const doneCount = Object.values(state.moduleDone).filter(Boolean).length;
+  const rows = items.map((it, idx)=>{
+    const done = state.moduleDone[it.key];
+    const prevDone = idx===0 ? true : state.moduleDone[items[idx-1].key];
+    const locked = !prevDone && !done;
+    return `<div class="module-row ${locked?'locked':''}" onclick="${locked? '': `openModule('${it.screen}')`}">
+      <div><div style="font-weight:700;">${it.label}</div><div class="muted" style="font-size:0.78rem;">SP ${it.sp}</div></div>
+      <div>${done ? "✅" : (locked ? "🔒" : "▶️")}</div>
+    </div>`;
+  }).join("");
+  return `
+    <div class="topbar"><span class="muted">Latihan Berpandu</span></div>
+    <h2>🧭 Peta Modul</h2>
+    <div class="progressbar"><div style="width:${(doneCount/5)*100}%"></div></div>
+    ${rows}
+    ${doneCount===5 ? `<button class="btn btn-primary" onclick="goTo('bankIntro')">Semua Modul Selesai — Teruskan →</button>` : `<p class="muted" style="text-align:center;">Selesaikan semua modul untuk buka Bank Soalan.</p>`}
+  `;
+}
+function openModule(screen){ state.qIndex=0; goTo(screen); }
+
+/* ---------- MODUL GENERIK ---------- */
+function getModuleData(key){
+  if(key==="A") return modA;
+  if(key==="B") return modB;
+  if(key==="C") return modC;
+  if(key==="D") return modD;
+  if(key==="E") return modE;
+  return [];
+}
+function screenModule(key, questions, title){
+  const i = state.qIndex;
+  if(i >= questions.length){
+    state.moduleDone[key] = true; saveState();
+    return `<h2>✅ ${title} — Selesai!</h2><p class="muted">Tahniah! Anda telah menguasai bahagian ini.</p><button class="btn btn-primary" onclick="goTo('moduleMenu')">Kembali ke Peta Modul →</button>`;
+  }
+  const q = questions[i];
+  return `
+    <div class="topbar"><button class="back" onclick="goTo('moduleMenu')">← Peta Modul</button></div>
+    <h3>${title}</h3>
+    <div class="progressbar"><div style="width:${(i/questions.length)*100}%"></div></div>
+    <div class="card">
+      <p style="font-weight:600;">${q.stem}</p>
+      <div>${q.options.map((o,idx)=>`<button class="btn-option" id="opt-${q.id}-${idx}" onclick="answerModule('${key}', '${q.id}', ${idx})">${o}</button>`).join("")}</div>
+      <div id="fb-${q.id}"></div>
+    </div>
+  `;
+}
+function answerModule(key, qid, idx){
+  const questions = getModuleData(key);
+  const q = questions.find(x=>x.id===qid);
+  if(!q || q._answered) return;
+  q._answered = true;
+  const correct = idx === q.correct;
+  q.options.forEach((o,oi)=>{
+    const btn = document.getElementById(`opt-${qid}-${oi}`);
+    btn.classList.add("disabled");
+    if(oi===q.correct) btn.classList.add("correct");
+    else if(oi===idx) btn.classList.add("wrong");
+  });
+  const fb = document.getElementById(`fb-${qid}`);
+  fb.className = "feedback " + (correct ? "ok" : "no");
+  fb.innerHTML = (correct ? "✅ Betul! " : "❌ Belum tepat. ") + q.explain;
+  fb.insertAdjacentHTML("afterend", `<button class="btn btn-primary" onclick="advanceModule('${key}')">Seterusnya →</button>`);
+  logAnswer(state.practiceLog, { id:q.id, module:key, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:"Latihan Berpandu" });
+}
+function advanceModule(key){ getModuleData(key).forEach(q=>{ q._answered=false; }); state.qIndex++; saveState(); render(); }
+
+/* ---------- BANK SOALAN ---------- */
+function screenBankIntro(){
+  return `
+    <h2>🏆 Bank Soalan 4 Aras</h2>
+    <div class="card">
+      <p>8 soalan merentasi 4 aras kesukaran:</p>
+      <div class="databox"><span class="badge-level lvl-rendah">RENDAH</span> Ingat & kenal pasti fakta asas</div>
+      <div class="databox"><span class="badge-level lvl-sederhana">SEDERHANA</span> Aplikasi prosedur biasa</div>
+      <div class="databox"><span class="badge-level lvl-tinggi">TINGGI</span> Analisis & multi-langkah</div>
+      <div class="databox"><span class="badge-level lvl-kbat">KBAT</span> Penaakulan & konteks sebenar</div>
+      <p class="muted" style="margin-bottom:0;">Jika tersilap pada aras Tinggi/KBAT, petunjuk akan diberikan.</p>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('bank', true)">Mula Bank Soalan →</button>
+  `;
+}
+function screenBank(){
+  const i = state.qIndex;
+  if(i >= bank.length){
+    return `<h2>✅ Bank Soalan Selesai</h2><p class="muted">Bersedia untuk cabaran akhir?</p><button class="btn btn-primary" onclick="goTo('exitTicket', true)">Ke Tiket Keluar →</button>`;
+  }
+  const q = bank[i];
+  const lvlClass = {"Rendah":"lvl-rendah","Sederhana":"lvl-sederhana","Tinggi":"lvl-tinggi","KBAT":"lvl-kbat"}[q.level];
+  return `
+    <div class="topbar"><span class="muted">Soalan ${i+1}/${bank.length}</span></div>
+    <div class="progressbar"><div style="width:${(i/bank.length)*100}%"></div></div>
+    <div class="card">
+      <span class="badge-level ${lvlClass}">${q.level}</span>
+      <p style="font-weight:600;">${q.stem}</p>
+      <div>${q.options.map((o,idx)=>`<button class="btn-option" id="optBank-${idx}" onclick="answerBank(${idx})">${o}</button>`).join("")}</div>
+      <div id="fbBank"></div>
+      <div id="hintBank"></div>
+    </div>
+  `;
+}
+function answerBank(idx){
+  const i = state.qIndex;
+  const q = bank[i];
+  if(q._answered) return;
+  const correct = idx === q.correct;
+  const needsScaffold = !correct && (q.level==="Tinggi" || q.level==="KBAT") && !q._hinted;
+  if(needsScaffold){
+    q._hinted = true; state.hintsUsedTotal++; saveState();
+    document.getElementById("hintBank").innerHTML = `<div class="hint-box">💡 Petunjuk: Kenal pasti pemboleh ubah dahulu, gantikan nilai yang diberi, kemudian kira mengikut tertib operasi.</div>`;
+    return;
+  }
+  q._answered = true;
+  q.options.forEach((o,oi)=>{
+    const btn = document.getElementById(`optBank-${oi}`);
+    btn.classList.add("disabled");
+    if(oi===q.correct) btn.classList.add("correct");
+    else if(oi===idx) btn.classList.add("wrong");
+  });
+  const fb = document.getElementById("fbBank");
+  fb.className = "feedback " + (correct ? "ok" : "no");
+  fb.innerHTML = (correct ? "✅ Betul! " : "❌ Belum tepat. ") + q.explain;
+  fb.insertAdjacentHTML("afterend", `<button class="btn btn-primary" onclick="advanceBank()">Seterusnya →</button>`);
+  logAnswer(state.bankLog, { id:q.id, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:q.level });
+}
+function advanceBank(){ state.qIndex++; saveState(); render(); }
+
+/* ---------- TIKET KELUAR ---------- */
+function screenExit(){
+  const i = state.qIndex;
+  if(i >= exitQ.length){
+    state.endTime = Date.now(); saveState();
+    return `<h2>🎉 Tugasan Studio Selesai!</h2><p class="muted">Tekan butang di bawah untuk lihat Ringkasan penuh.</p><button class="btn btn-gold" onclick="goTo('summary')">Lihat Ringkasan →</button>`;
+  }
+  const q = exitQ[i];
+  return `
+    <div class="topbar"><span class="muted">Tiket Keluar ${i+1}/${exitQ.length}</span></div>
+    <div class="progressbar"><div style="width:${(i/exitQ.length)*100}%"></div></div>
+    <div class="card">
+      <p style="font-weight:600;">${q.stem}</p>
+      <div>${q.options.map((o,idx)=>`<button class="btn-option" id="optExit-${idx}" onclick="answerExit(${idx})">${o}</button>`).join("")}</div>
+      <div id="fbExit"></div>
+    </div>
+  `;
+}
+function answerExit(idx){
+  const i = state.qIndex;
+  const q = exitQ[i];
+  if(q._answered) return;
+  q._answered = true;
+  const correct = idx === q.correct;
+  q.options.forEach((o,oi)=>{
+    const btn = document.getElementById(`optExit-${oi}`);
+    btn.classList.add("disabled");
+    if(oi===q.correct) btn.classList.add("correct");
+    else if(oi===idx) btn.classList.add("wrong");
+  });
+  const fb = document.getElementById("fbExit");
+  fb.className = "feedback " + (correct ? "ok" : "no");
+  fb.innerHTML = (correct ? "✅ Betul! " : "❌ Belum tepat. ") + q.explain;
+  fb.insertAdjacentHTML("afterend", `<button class="btn btn-primary" onclick="advanceExit()">Seterusnya →</button>`);
+  logAnswer(state.exitLog, { id:q.id, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:"Tiket Keluar" });
+}
+function advanceExit(){ state.qIndex++; saveState(); render(); }
+
+/* ---------- RINGKASAN ---------- */
+function allLogs(){ return [].concat(state.diagLog, state.practiceLog, state.bankLog, state.exitLog); }
+function screenSummary(){
+  const logs = allLogs();
+  const gradedLogs = [].concat(state.practiceLog, state.bankLog, state.exitLog);
+  const totalCorrect = gradedLogs.filter(l=>l.correct).length;
+  const totalQ = gradedLogs.length;
+  const pct = totalQ ? Math.round((totalCorrect/totalQ)*100) : 0;
+  let masteryLabel = "Tahap 1 — Asas";
+  if(pct>=80) masteryLabel = "Tahap 3 — Cemerlang 🔤";
+  else if(pct>=60) masteryLabel = "Tahap 2 — Baik";
+  const durationSec = state.endTime && state.startTime ? Math.round((state.endTime-state.startTime)/1000) : 0;
+  const mins = Math.floor(durationSec/60), secs = durationSec%60;
+  const listItems = logs.map(l=>{
+    return `<div class="scoreitem">
+      <div>${l.level ? `<span class="muted">[${l.level}]</span> ` : ""}${escapeHtml(l.question)}</div>
+      <div>${l.correct ? '<span class="ok-tag">✔ Betul</span>' : '<span class="no-tag">✘ Salah</span>'} — Jawapan anda: <b>${escapeHtml(l.chosen)}</b>${l.correct ? "" : ` | Jawapan betul: <b>${escapeHtml(l.correctAns)}</b>`}</div>
+    </div>`;
+  }).join("");
+  return `
+    <h2>📋 Ringkasan Studio Rahsia</h2>
+    <div class="card">
+      <p style="margin-bottom:4px;"><b>Nama:</b> ${escapeHtml(state.name)}</p>
+      <p style="margin-bottom:0;"><b>Kelas:</b> ${escapeHtml(state.kelas)}</p>
+    </div>
+    <div class="statrow">
+      <div class="statbox"><div class="num">${totalCorrect}/${totalQ}</div><div class="lbl">Markah</div></div>
+      <div class="statbox"><div class="num">${pct}%</div><div class="lbl">Peratus</div></div>
+      <div class="statbox"><div class="num">${mins}m ${secs}s</div><div class="lbl">Masa</div></div>
+    </div>
+    <div class="card" style="text-align:center;"><div class="pill" style="font-size:0.85rem;">${masteryLabel}</div></div>
+    <h3>Log Jawapan Terperinci</h3>
+    <div class="scorelist">${listItems}</div>
+    <button class="btn btn-ghost" onclick="goTo('confirmReset')">🔄 Set Semula & Cuba Lagi</button>
+    <p class="footer-note">SK 5.1 Pemboleh Ubah & Ungkapan Algebra · KSSM Matematik Tingkatan 1 · ${VERSION}<br>Sila tangkap skrin ini untuk dihantar kepada guru.</p>
+  `;
+}
+
+/* ---------- RESET ---------- */
+function screenConfirmReset(){
+  return `
+    <h2>⚠️ Sahkan Set Semula</h2>
+    <div class="card"><p>Tindakan ini akan memadam semua rekod jawapan dan markah anda untuk permulaan baharu. Tindakan ini tidak boleh diundur.</p></div>
+    <button class="btn btn-primary" style="background:var(--negative);" onclick="doReset()">Ya, Padam & Mula Semula</button>
+    <button class="btn btn-ghost" onclick="goBack()">Batal, Kembali</button>
+  `;
+}
+function doReset(){ localStorage.removeItem(STORAGE_KEY); state = freshState(); render(); }
+
+/* ---------- UTIL ---------- */
+function escapeHtml(str){
+  if(str === undefined || str === null) return "";
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+/* ---------- MULA ---------- */
+render();
+</script>
+</body>
+</html>

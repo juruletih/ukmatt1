@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Kilang Pengeluaran: Nisbah, Kadar & Kadaran | SK 4.4</title>
+<style>
+  :root{
+    --bg: #14101f; --bg-alt: #1c1730; --surface: #251e3d; --surface-2: #2f264c;
+    --border: #453a66; --text: #f3eefb; --muted: #b7a8d4;
+    --positive: #a78bfa; --positive-dark: #5b3fa0;
+    --negative: #fb7185; --negative-dark: #b8324a;
+    --gold: #f4b942; --radius: 14px; --maxw: 560px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: radial-gradient(ellipse at top, #2a2148 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh; display:flex; justify-content:center; line-height:1.5;
+  }
+  #app{ width:100%; max-width: var(--maxw); min-height:100vh; padding: 18px 18px 40px; position:relative; }
+  h1,h2,h3{ margin:0 0 8px; font-weight:700; letter-spacing:-0.01em; }
+  h1{ font-size:1.5rem; } h2{ font-size:1.2rem; } h3{ font-size:1.02rem; }
+  p{ margin:0 0 12px; color: var(--text); }
+  .muted{ color: var(--muted); font-size:0.9rem; }
+  .card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:16px; margin-bottom:14px; }
+  .pill{ display:inline-block; padding:3px 10px; border-radius:999px; font-size:0.72rem; font-weight:700; letter-spacing:0.02em; background: var(--surface-2); color: var(--gold); border:1px solid var(--border); }
+  .btn{ display:block; width:100%; padding:14px 16px; border-radius: 12px; border:none; font-size:1rem; font-weight:700; cursor:pointer; margin-top:10px; -webkit-tap-highlight-color: transparent; }
+  .btn:active{ transform: scale(0.98); }
+  .btn-primary{ background: var(--positive); color:#1c0f33; }
+  .btn-ghost{ background: transparent; color: var(--muted); border:1px solid var(--border); }
+  .btn-gold{ background: var(--gold); color:#3a2600; }
+  .btn-option{ display:block; width:100%; text-align:left; background: var(--surface-2); color: var(--text); border:1px solid var(--border); border-radius:12px; padding:13px 14px; margin-top:9px; font-size:0.98rem; cursor:pointer; }
+  .btn-option.correct{ background: var(--positive-dark); border-color: var(--positive); }
+  .btn-option.wrong{ background: var(--negative-dark); border-color: var(--negative); }
+  .btn-option.disabled{ pointer-events:none; opacity:0.85; }
+  input[type=text]{ width:100%; padding:13px 14px; border-radius:12px; border:1px solid var(--border); background: var(--surface-2); color: var(--text); font-size:1rem; margin-bottom:6px; }
+  label{ font-size:0.85rem; color: var(--muted); display:block; margin-bottom:5px; margin-top:10px; }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:10px; }
+  .topbar .back{ background:none; border:none; color: var(--muted); font-size:0.95rem; cursor:pointer; padding:6px 0; }
+  .progressbar{ width:100%; height:8px; background: var(--surface-2); border-radius:999px; overflow:hidden; margin: 8px 0 16px; }
+  .progressbar > div{ height:100%; background: linear-gradient(90deg, var(--positive), var(--gold)); }
+  .databox{ background: var(--bg-alt); border-left:4px solid var(--gold); border-radius:8px; padding:12px 14px; margin:10px 0; font-size:0.95rem; }
+  .databox.neg{ border-left-color: var(--negative); }
+  .databox.pos{ border-left-color: var(--positive); }
+  .feedback{ border-radius:10px; padding:12px 14px; margin-top:10px; font-size:0.92rem; font-weight:600; }
+  .feedback.ok{ background: rgba(167,139,250,0.15); color: var(--positive); border:1px solid var(--positive); }
+  .feedback.no{ background: rgba(251,113,133,0.15); color: var(--negative); border:1px solid var(--negative); }
+  .hint-box{ background: var(--surface-2); border:1px dashed var(--gold); border-radius:10px; padding:10px 12px; margin-top:8px; font-size:0.88rem; color: var(--gold); }
+  .badge-level{ display:inline-block; font-size:0.68rem; font-weight:800; letter-spacing:0.03em; padding:2px 8px; border-radius:6px; margin-bottom:8px; }
+  .lvl-rendah{ background:#264d3a; color:#7be0a8; }
+  .lvl-sederhana{ background:#2a4763; color:#7fc4f7; }
+  .lvl-tinggi{ background:#5a3a1f; color:#f7b563; }
+  .lvl-kbat{ background:#4a2338; color:#f78fc0; }
+  .statrow{ display:flex; gap:10px; margin-bottom:14px; }
+  .statbox{ flex:1; background: var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px; text-align:center; }
+  .statbox .num{ font-size:1.3rem; font-weight:800; color: var(--gold); }
+  .statbox .lbl{ font-size:0.7rem; color: var(--muted); }
+  .scorelist{ max-height:340px; overflow-y:auto; border:1px solid var(--border); border-radius:12px; }
+  .scoreitem{ padding:10px 12px; border-bottom:1px solid var(--border); font-size:0.85rem; }
+  .scoreitem:last-child{ border-bottom:none; }
+  .scoreitem .ok-tag{ color: var(--positive); font-weight:700; }
+  .scoreitem .no-tag{ color: var(--negative); font-weight:700; }
+  .version-badge{ position:absolute; top:10px; right:10px; font-size:0.62rem; background: var(--surface-2); color: var(--muted); border:1px solid var(--border); padding:3px 7px; border-radius:6px; }
+  .module-row{ display:flex; align-items:center; justify-content:space-between; background: var(--surface); border:1px solid var(--border); border-radius:12px; padding:13px 14px; margin-bottom:10px; cursor:pointer; }
+  .module-row.locked{ opacity:0.45; cursor:not-allowed; }
+  .footer-note{ text-align:center; font-size:0.72rem; color: var(--muted); margin-top:24px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* =========================================================
+   KILANG PENGELUARAN: Nisbah, Kadar & Kadaran
+   SK 4.4 | KSSM Matematik Tingkatan 1
+   VERSI v1.0
+   ========================================================= */
+const VERSION = "v1.0";
+const STORAGE_KEY = "kilang_pengeluaran_sk44_state";
+
+function freshState(){
+  return {
+    path:["welcome"], name:"", kelas:"", startTime:null, endTime:null,
+    diagLog:[], practiceLog:[], bankLog:[], exitLog:[],
+    moduleDone:{ A:false,B:false,C:false,D:false }, moduleIndex:0, qIndex:0,
+    hintsUsedTotal:0, version: VERSION
+  };
+}
+let state = loadState();
+function loadState(){
+  try{
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if(!saved) return freshState();
+    return Object.assign(freshState(), JSON.parse(saved));
+  }catch(e){ return freshState(); }
+}
+function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+function goTo(screen, resetSub){ if(resetSub){ state.qIndex=0; } state.path.push(screen); saveState(); render(); }
+function goBack(){ if(state.path.length>1){ state.path.pop(); } saveState(); render(); }
+function currentScreen(){ return state.path[state.path.length-1]; }
+
+/* ---------- DATA SOALAN ---------- */
+
+// Modul A — 4.4.1 Nisbah tiga kuantiti drpd 2+ nisbah dua kuantiti
+const modA = [
+  { id:"A1", stem:"Nisbah A:B=2:3 dan B:C=3:4. Cari nisbah A:B:C.", options:["2:3:4","2:4:3","3:2:4","4:3:2"], correct:0, explain:"Nilai B sudah sepadan (3=3), jadi terus gabung: A:B:C=2:3:4." },
+  { id:"A2", stem:"Nisbah X:Y=1:2 dan Y:Z=4:5. Cari nisbah X:Y:Z (samakan nilai Y dahulu).", options:["2:4:5","1:2:5","1:4:5","4:8:10"], correct:0, explain:"Y perlu sama: X:Y=1:2=2:4 (×2). Y:Z=4:5. Jadi X:Y:Z=2:4:5." },
+  { id:"A3", stem:"Untuk menggabungkan dua nisbah A:B dan B:C menjadi A:B:C, langkah PERTAMA ialah:", options:["Samakan nilai B dalam kedua-dua nisbah","Terus darabkan semua nombor","Tambahkan A dan C","Abaikan B"], correct:0, explain:"Nilai B (kuantiti sepunya) mesti disamakan dahulu sebelum digabungkan." }
+];
+
+// Modul B — 4.4.2 Nisbah/nilai berkaitan diberi (i) 2 kuantiti+1 nilai (ii) 3 kuantiti+1 nilai
+const modB = [
+  { id:"B1", stem:"Nisbah wang Ali:Bakar = 3:5. Jika Ali ada RM60, berapakah wang Bakar?", options:["RM100","RM36","RM180","RM20"], correct:0, explain:"Skala=60÷3=20. Bakar=5×20=RM100." },
+  { id:"B2", stem:"Nisbah A:B:C = 2:3:5. Jika A=8, cari nilai B dan C.", options:["B=12, C=20","B=8, C=8","B=20, C=12","B=6, C=10"], correct:0, explain:"Skala=8÷2=4. B=3×4=12, C=5×4=20." },
+  { id:"B3", stem:"Nisbah panjang:lebar sebuah taman ialah 5:2. Jika lebar taman 14m, cari panjangnya.", options:["35 m","28 m","20 m","7 m"], correct:0, explain:"Skala=14÷2=7. Panjang=5×7=35m." }
+];
+
+// Modul C — 4.4.3 Nilai berkaitan dengan kadar
+const modC = [
+  { id:"C1", stem:"Sebuah mesin mengeluarkan barangan pada kadar 45 unit sejam. Berapa unit dihasilkan dalam 6 jam?", options:["270 unit","51 unit","7.5 unit","450 unit"], correct:0, explain:"45×6=270 unit." },
+  { id:"C2", stem:"Seorang pekerja dibayar pada kadar RM12 sejam. Jika dia menerima RM96, berapa jam dia bekerja?", options:["8 jam","84 jam","108 jam","12 jam"], correct:0, explain:"96÷12=8 jam." },
+  { id:"C3", stem:"Sebiji tab mandi diisi air pada kadar 15 liter seminit. Berapa minit diperlukan untuk mengisi 180 liter?", options:["12 minit","195 minit","165 minit","2700 minit"], correct:0, explain:"180÷15=12 minit." }
+];
+
+// Modul D — 4.4.4 Selesaikan masalah nisbah, kadar, kadaran (termasuk anggaran)
+const modD = [
+  { id:"D1", stem:"Nisbah gula:tepung dalam resipi ialah 1:4. Seorang tukang masak menganggarkan dia perlukan lebih kurang 500g tepung. Anggarkan berapa gram gula diperlukan.", options:["Lebih kurang 125g","Lebih kurang 2000g","Lebih kurang 500g","Lebih kurang 100g"], correct:0, explain:"1:4 = x:500 → x=500÷4=125g." },
+  { id:"D2", stem:"Sebuah kereta menggunakan bahan api pada kadar 12 km seliter. Anggarkan berapa liter diperlukan untuk perjalanan 100 km (bundarkan kepada liter terdekat).", options:["Lebih kurang 8 liter","Lebih kurang 12 liter","Lebih kurang 100 liter","Lebih kurang 1200 liter"], correct:0, explain:"100÷12≈8.3, dibundarkan ke 8 liter." }
+];
+
+// Bank Soalan 4 Aras
+const bank = [
+  { level:"Rendah", id:"BR1", stem:"Nisbah A:B=2:5. Jika A=6, cari B.", options:["15","10","12","30"], correct:0, explain:"Skala=6÷2=3. B=5×3=15." },
+  { level:"Rendah", id:"BR2", stem:"Kadar pengeluaran 20 unit sejam. Dalam 3 jam, berapa unit dihasilkan?", options:["60 unit","23 unit","17 unit","6.67 unit"], correct:0, explain:"20×3=60 unit." },
+  { level:"Sederhana", id:"BS1", stem:"Nisbah A:B:C = 3:4:5. Jika B=16, cari nilai A dan C.", options:["A=12, C=20","A=16, C=16","A=20, C=12","A=8, C=10"], correct:0, explain:"Skala=16÷4=4. A=3×4=12, C=5×4=20." },
+  { level:"Sederhana", id:"BS2", stem:"Nisbah X:Y=2:3 dan Y:Z=6:7. Cari nisbah X:Y:Z.", options:["4:6:7","2:3:7","2:6:7","4:3:7"], correct:0, explain:"Samakan Y: X:Y=2:3=4:6. Y:Z=6:7. X:Y:Z=4:6:7." },
+  { level:"Tinggi", id:"BT1", stem:"Nisbah jumlah wang Ahmad:Bahar:Chong ialah 3:4:5. Jika jumlah wang ketiga-tiganya RM480, berapakah wang Bahar?", options:["RM160","RM144","RM120","RM200"], correct:0, explain:"Jumlah bahagian=3+4+5=12. Setiap bahagian=480÷12=40. Bahar=4×40=RM160." },
+  { level:"Tinggi", id:"BT2", stem:"Sebuah kilang menghasilkan 850 unit pada kadar tetap dalam 5 jam. Pada kadar yang sama, berapa unit dihasilkan dalam 8 jam?", options:["1360 unit","1062.5 unit","680 unit","1700 unit"], correct:0, explain:"Kadar=850÷5=170 unit/jam. Dalam 8jam=170×8=1360 unit." },
+  { level:"KBAT", id:"BK1", stem:"Seorang murid menggabungkan A:B=2:5 dan B:C=2:3 terus menjadi A:B:C=2:5:3 TANPA menyamakan nilai B dahulu. Adakah ini BETUL?", options:["Betul, boleh terus gabung", "Salah — nilai B (5 dan 2) mesti disamakan dahulu (cari GSTK); jawapan sebenar A:B:C=4:10:15", "Betul, kerana B sentiasa sama", "Tidak boleh digabungkan langsung"], correct:1, explain:"B mesti disamakan dahulu: GSTK(5,2)=10. A:B=2:5=4:10. B:C=2:3=10:15. Jadi A:B:C=4:10:15." },
+  { level:"KBAT", id:"BK2", stem:"Dua buah kilang mengeluarkan barangan pada kadar berbeza: Kilang A 120 unit dalam 4 jam, Kilang B 200 unit dalam 5 jam. Kilang manakah LEBIH PANTAS (kadar seunit masa lebih tinggi)?", options:["Kilang B (40 unit/jam berbanding 30 unit/jam)","Kilang A lebih pantas","Kedua-duanya sama pantas","Tidak boleh dibandingkan"], correct:0, explain:"Kilang A: 120÷4=30 unit/jam. Kilang B: 200÷5=40 unit/jam. Kilang B lebih pantas." }
+];
+
+// Tiket Keluar
+const exitQ = [
+  { id:"E1", stem:"Nisbah A:B=3:4. Jika A=9, cari B.", options:["12","16","6","15"], correct:0, explain:"Skala=9÷3=3. B=4×3=12." },
+  { id:"E2", stem:"Kadar 25 unit sejam. Dalam 4 jam, berapa unit dihasilkan?", options:["100 unit","29 unit","21 unit","6.25 unit"], correct:0, explain:"25×4=100 unit." },
+  { id:"E3", stem:"Nisbah A:B:C=1:2:3. Jika jumlah=60, cari nilai A.", options:["10","20","30","6"], correct:0, explain:"Jumlah bahagian=6. Setiap bahagian=60÷6=10. A=1×10=10." }
+];
+
+function logAnswer(logArray, record){ logArray.push(record); saveState(); }
+
+/* ---------- RENDER UTAMA ---------- */
+function render(){
+  const app = document.getElementById("app");
+  const screen = currentScreen();
+  let html = "";
+  switch(screen){
+    case "welcome": html = screenWelcome(); break;
+    case "identitas": html = screenIdentitas(); break;
+    case "objektif": html = screenObjektif(); break;
+    case "diagnostic": html = screenDiagnostic(); break;
+    case "notes": html = screenNotes(); break;
+    case "moduleMenu": html = screenModuleMenu(); break;
+    case "moduleA": html = screenModule("A", modA, "4.4.1 Gabung Nisbah Tiga Kuantiti"); break;
+    case "moduleB": html = screenModule("B", modB, "4.4.2 Nisbah/Nilai Berkaitan"); break;
+    case "moduleC": html = screenModule("C", modC, "4.4.3 Nilai Berkaitan Kadar"); break;
+    case "moduleD": html = screenModule("D", modD, "4.4.4 Penyelesaian Masalah & Anggaran"); break;
+    case "bankIntro": html = screenBankIntro(); break;
+    case "bank": html = screenBank(); break;
+    case "exitTicket": html = screenExit(); break;
+    case "summary": html = screenSummary(); break;
+    case "confirmReset": html = screenConfirmReset(); break;
+    default: html = screenWelcome();
+  }
+  app.innerHTML = `<div class="version-badge">🔖 VERSI: ${VERSION}</div>` + html;
+}
+
+/* ---------- WELCOME ---------- */
+function screenWelcome(){
+  return `
+    <div style="padding-top:50px; text-align:center;">
+      <div class="pill">KILANG PENGELUARAN</div>
+      <h1 style="margin-top:14px;">🏭 Nisbah, Kadar & Kadaran</h1>
+      <p class="muted">Standard Kandungan 4.4<br>KSSM Matematik Tingkatan 1</p>
+      <div class="card" style="text-align:left; margin-top:24px;">
+        <h3>Apa yang menanti anda?</h3>
+        <p class="muted" style="margin-bottom:0;">Sebagai pengurus kilang, anda perlu menggabungkan nisbah, mengira kadar pengeluaran, dan membuat anggaran — semuanya dalam satu misi bersepadu!</p>
+      </div>
+      <button class="btn btn-primary" onclick="goTo('identitas')">Mula Tugasan →</button>
+    </div>
+  `;
+}
+
+/* ---------- IDENTITAS ---------- */
+function screenIdentitas(){
+  return `
+    <div class="topbar"><button class="back" onclick="goBack()">← Kembali</button></div>
+    <h2>Sebelum bermula...</h2>
+    <p class="muted">Isikan maklumat anda untuk rekod prestasi.</p>
+    <div class="card">
+      <label for="inpName">Nama</label>
+      <input type="text" id="inpName" placeholder="Nama penuh" value="${escapeHtml(state.name)}">
+      <label for="inpKelas">Kelas</label>
+      <input type="text" id="inpKelas" placeholder="Contoh: 1 Cemerlang" value="${escapeHtml(state.kelas)}">
+    </div>
+    <button class="btn btn-primary" onclick="submitIdentitas()">Sedia! Mulakan →</button>
+  `;
+}
+function submitIdentitas(){
+  const n = document.getElementById("inpName").value.trim();
+  const k = document.getElementById("inpKelas").value.trim();
+  if(!n || !k){ alertInline("Sila isikan Nama dan Kelas sebelum meneruskan."); return; }
+  state.name=n; state.kelas=k;
+  if(!state.startTime){ state.startTime = Date.now(); }
+  saveState(); goTo("objektif");
+}
+function alertInline(msg){
+  const card = document.querySelector(".card");
+  let warn = document.getElementById("inlineWarn");
+  if(!warn){ warn=document.createElement("div"); warn.id="inlineWarn"; warn.className="feedback no"; card.appendChild(warn); }
+  warn.textContent = msg;
+}
+
+/* ---------- OBJEKTIF ---------- */
+function screenObjektif(){
+  return `
+    <div class="topbar"><button class="back" onclick="goBack()">← Kembali</button></div>
+    <h2>🎯 Taklimat Misi</h2>
+    <div class="card">
+      <h3>Objektif Pembelajaran</h3>
+      <div class="databox">1. Menentukan nisbah tiga kuantiti apabila dua atau lebih nisbah dua kuantiti diberi.</div>
+      <div class="databox">2. Menentukan nisbah/nilai berkaitan apabila diberi nisbah dan satu nilai.</div>
+      <div class="databox">3. Menentukan nilai yang berkaitan dengan suatu kadar.</div>
+      <div class="databox">4. Menyelesaikan masalah nisbah, kadar, kadaran, termasuk membuat anggaran.</div>
+    </div>
+    <div class="card">
+      <h3>Kriteria Kejayaan</h3>
+      <p class="muted" style="margin-bottom:0;">Selesaikan sekurang-kurangnya 8 daripada 10 soalan dalam Bank Soalan dengan betul, merangkumi semua aras kesukaran.</p>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('diagnostic')">Mula Semakan Awal →</button>
+  `;
+}
+
+/* ---------- SEMAKAN AWAL ---------- */
+const diagQ = [
+  { id:"DG1", stem:"Nisbah A:B=1:2. Jika A=5, cari B.", options:["10","5","2","15"], correct:0 },
+  { id:"DG2", stem:"Kadar 10 unit sejam. Dalam 5 jam:", options:["50 unit","15 unit","2 unit","55 unit"], correct:0 },
+  { id:"DG3", stem:"Untuk gabung A:B dan B:C jadi A:B:C, langkah penting ialah:", options:["Samakan nilai B","Abaikan B","Tambah A+C","Darab semua"], correct:0 }
+];
+function screenDiagnostic(){
+  const i = state.qIndex;
+  if(i >= diagQ.length){
+    return `<h2>✅ Semakan Awal Selesai</h2><p class="muted">Mari kukuhkan kefahaman dengan Nota Lengkap.</p><button class="btn btn-primary" onclick="goTo('notes')">Lihat Nota Lengkap →</button>`;
+  }
+  const q = diagQ[i];
+  return `
+    <div class="topbar"><span class="muted">Semakan Awal ${i+1}/${diagQ.length}</span></div>
+    <div class="progressbar"><div style="width:${(i/diagQ.length)*100}%"></div></div>
+    <div class="card"><h3>${q.stem}</h3><div>${q.options.map((o,idx)=>`<button class="btn-option" onclick="answerDiagnostic(${idx})">${o}</button>`).join("")}</div></div>
+  `;
+}
+function answerDiagnostic(idx){
+  const q = diagQ[state.qIndex];
+  const correct = idx===q.correct;
+  logAnswer(state.diagLog, { id:q.id, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:"Diagnostik" });
+  state.qIndex++; saveState(); render();
+}
+
+/* ---------- NOTA LENGKAP ---------- */
+function screenNotes(){
+  return `
+    <div class="topbar"><button class="back" onclick="goBack()">← Kembali</button></div>
+    <h2>📘 Nota Lengkap: Nisbah, Kadar & Kadaran</h2>
+    <div class="card">
+      <h3>1. Menggabung Dua Nisbah Menjadi Nisbah Tiga Kuantiti</h3>
+      <p><b>Contoh Lengkap:</b> A:B=2:5, B:C=2:3. Cari A:B:C.</p>
+      <div class="databox">Langkah 1: Nilai B tidak sama (5 dan 2). Cari GSTK(5,2)=10</div>
+      <div class="databox">Langkah 2: A:B=2:5=4:10 (×2). B:C=2:3=10:15 (×5)</div>
+      <div class="databox">Langkah 3: A:B:C = 4:10:15</div>
+    </div>
+    <div class="card">
+      <h3>2. Nisbah/Nilai Berkaitan</h3>
+      <p>Apabila diberi satu nilai sebenar, cari SKALA dahulu (nilai sebenar ÷ bahagian nisbah), kemudian darabkan untuk cari kuantiti lain.</p>
+    </div>
+    <div class="card">
+      <h3>3. Nilai Berkaitan Kadar</h3>
+      <p>Kadar × masa/kuantiti = jumlah. Jumlah ÷ kadar = masa/kuantiti.</p>
+    </div>
+    <div class="card">
+      <h3>4. Penyelesaian Masalah & Anggaran</h3>
+      <p class="muted" style="margin-bottom:0;"><b>⚠️ Miskonsepsi biasa:</b> Menggabungkan dua nisbah TANPA menyamakan nilai sepunya dahulu — ini menghasilkan jawapan SALAH.</p>
+    </div>
+    <div class="card">
+      <h3>📌 Rumusan Pantas</h3>
+      <div class="databox">• Gabung nisbah: samakan nilai sepunya dahulu (guna GSTK jika perlu)</div>
+      <div class="databox">• Skala = nilai sebenar ÷ bahagian nisbah sepadan</div>
+      <div class="databox">• Kadar: jumlah = kadar × masa/kuantiti</div>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('moduleMenu')">Faham, Sedia untuk Latihan →</button>
+  `;
+}
+
+/* ---------- MENU MODUL ---------- */
+function screenModuleMenu(){
+  const items = [
+    {key:"A", label:"Modul A · Gabung Nisbah Tiga Kuantiti", sp:"4.4.1", screen:"moduleA"},
+    {key:"B", label:"Modul B · Nisbah/Nilai Berkaitan", sp:"4.4.2", screen:"moduleB"},
+    {key:"C", label:"Modul C · Nilai Berkaitan Kadar", sp:"4.4.3", screen:"moduleC"},
+    {key:"D", label:"Modul D · Penyelesaian Masalah & Anggaran", sp:"4.4.4", screen:"moduleD"}
+  ];
+  const doneCount = Object.values(state.moduleDone).filter(Boolean).length;
+  const rows = items.map((it, idx)=>{
+    const done = state.moduleDone[it.key];
+    const prevDone = idx===0 ? true : state.moduleDone[items[idx-1].key];
+    const locked = !prevDone && !done;
+    return `<div class="module-row ${locked?'locked':''}" onclick="${locked? '': `openModule('${it.screen}')`}">
+      <div><div style="font-weight:700;">${it.label}</div><div class="muted" style="font-size:0.78rem;">SP ${it.sp}</div></div>
+      <div>${done ? "✅" : (locked ? "🔒" : "▶️")}</div>
+    </div>`;
+  }).join("");
+  return `
+    <div class="topbar"><span class="muted">Latihan Berpandu</span></div>
+    <h2>🧭 Peta Modul</h2>
+    <div class="progressbar"><div style="width:${(doneCount/4)*100}%"></div></div>
+    ${rows}
+    ${doneCount===4 ? `<button class="btn btn-primary" onclick="goTo('bankIntro')">Semua Modul Selesai — Teruskan →</button>` : `<p class="muted" style="text-align:center;">Selesaikan semua modul untuk buka Bank Soalan.</p>`}
+  `;
+}
+function openModule(screen){ state.qIndex=0; goTo(screen); }
+
+/* ---------- MODUL GENERIK ---------- */
+function getModuleData(key){
+  if(key==="A") return modA;
+  if(key==="B") return modB;
+  if(key==="C") return modC;
+  if(key==="D") return modD;
+  return [];
+}
+function screenModule(key, questions, title){
+  const i = state.qIndex;
+  if(i >= questions.length){
+    state.moduleDone[key] = true; saveState();
+    return `<h2>✅ ${title} — Selesai!</h2><p class="muted">Tahniah! Anda telah menguasai bahagian ini.</p><button class="btn btn-primary" onclick="goTo('moduleMenu')">Kembali ke Peta Modul →</button>`;
+  }
+  const q = questions[i];
+  return `
+    <div class="topbar"><button class="back" onclick="goTo('moduleMenu')">← Peta Modul</button></div>
+    <h3>${title}</h3>
+    <div class="progressbar"><div style="width:${(i/questions.length)*100}%"></div></div>
+    <div class="card">
+      <p style="font-weight:600;">${q.stem}</p>
+      <div>${q.options.map((o,idx)=>`<button class="btn-option" id="opt-${q.id}-${idx}" onclick="answerModule('${key}', '${q.id}', ${idx})">${o}</button>`).join("")}</div>
+      <div id="fb-${q.id}"></div>
+    </div>
+  `;
+}
+function answerModule(key, qid, idx){
+  const questions = getModuleData(key);
+  const q = questions.find(x=>x.id===qid);
+  if(!q || q._answered) return;
+  q._answered = true;
+  const correct = idx === q.correct;
+  q.options.forEach((o,oi)=>{
+    const btn = document.getElementById(`opt-${qid}-${oi}`);
+    btn.classList.add("disabled");
+    if(oi===q.correct) btn.classList.add("correct");
+    else if(oi===idx) btn.classList.add("wrong");
+  });
+  const fb = document.getElementById(`fb-${qid}`);
+  fb.className = "feedback " + (correct ? "ok" : "no");
+  fb.innerHTML = (correct ? "✅ Betul! " : "❌ Belum tepat. ") + q.explain;
+  fb.insertAdjacentHTML("afterend", `<button class="btn btn-primary" onclick="advanceModule('${key}')">Seterusnya →</button>`);
+  logAnswer(state.practiceLog, { id:q.id, module:key, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:"Latihan Berpandu" });
+}
+function advanceModule(key){ getModuleData(key).forEach(q=>{ q._answered=false; }); state.qIndex++; saveState(); render(); }
+
+/* ---------- BANK SOALAN ---------- */
+function screenBankIntro(){
+  return `
+    <h2>🏆 Bank Soalan 4 Aras</h2>
+    <div class="card">
+      <p>8 soalan merentasi 4 aras kesukaran:</p>
+      <div class="databox"><span class="badge-level lvl-rendah">RENDAH</span> Ingat & kenal pasti fakta asas</div>
+      <div class="databox"><span class="badge-level lvl-sederhana">SEDERHANA</span> Aplikasi prosedur biasa</div>
+      <div class="databox"><span class="badge-level lvl-tinggi">TINGGI</span> Analisis & multi-langkah</div>
+      <div class="databox"><span class="badge-level lvl-kbat">KBAT</span> Penaakulan & konteks sebenar</div>
+      <p class="muted" style="margin-bottom:0;">Jika tersilap pada aras Tinggi/KBAT, petunjuk akan diberikan.</p>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('bank', true)">Mula Bank Soalan →</button>
+  `;
+}
+function screenBank(){
+  const i = state.qIndex;
+  if(i >= bank.length){
+    return `<h2>✅ Bank Soalan Selesai</h2><p class="muted">Bersedia untuk cabaran akhir?</p><button class="btn btn-primary" onclick="goTo('exitTicket', true)">Ke Tiket Keluar →</button>`;
+  }
+  const q = bank[i];
+  const lvlClass = {"Rendah":"lvl-rendah","Sederhana":"lvl-sederhana","Tinggi":"lvl-tinggi","KBAT":"lvl-kbat"}[q.level];
+  return `
+    <div class="topbar"><span class="muted">Soalan ${i+1}/${bank.length}</span></div>
+    <div class="progressbar"><div style="width:${(i/bank.length)*100}%"></div></div>
+    <div class="card">
+      <span class="badge-level ${lvlClass}">${q.level}</span>
+      <p style="font-weight:600;">${q.stem}</p>
+      <div>${q.options.map((o,idx)=>`<button class="btn-option" id="optBank-${idx}" onclick="answerBank(${idx})">${o}</button>`).join("")}</div>
+      <div id="fbBank"></div>
+      <div id="hintBank"></div>
+    </div>
+  `;
+}
+function answerBank(idx){
+  const i = state.qIndex;
+  const q = bank[i];
+  if(q._answered) return;
+  const correct = idx === q.correct;
+  const needsScaffold = !correct && (q.level==="Tinggi" || q.level==="KBAT") && !q._hinted;
+  if(needsScaffold){
+    q._hinted = true; state.hintsUsedTotal++; saveState();
+    document.getElementById("hintBank").innerHTML = `<div class="hint-box">💡 Petunjuk: Kenal pasti dahulu jenis soalan (nisbah/kadar/kadaran), cari skala atau nilai seunit, kemudian selesaikan langkah demi langkah.</div>`;
+    return;
+  }
+  q._answered = true;
+  q.options.forEach((o,oi)=>{
+    const btn = document.getElementById(`optBank-${oi}`);
+    btn.classList.add("disabled");
+    if(oi===q.correct) btn.classList.add("correct");
+    else if(oi===idx) btn.classList.add("wrong");
+  });
+  const fb = document.getElementById("fbBank");
+  fb.className = "feedback " + (correct ? "ok" : "no");
+  fb.innerHTML = (correct ? "✅ Betul! " : "❌ Belum tepat. ") + q.explain;
+  fb.insertAdjacentHTML("afterend", `<button class="btn btn-primary" onclick="advanceBank()">Seterusnya →</button>`);
+  logAnswer(state.bankLog, { id:q.id, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:q.level });
+}
+function advanceBank(){ state.qIndex++; saveState(); render(); }
+
+/* ---------- TIKET KELUAR ---------- */
+function screenExit(){
+  const i = state.qIndex;
+  if(i >= exitQ.length){
+    state.endTime = Date.now(); saveState();
+    return `<h2>🎉 Tugasan Kilang Selesai!</h2><p class="muted">Tekan butang di bawah untuk lihat Ringkasan penuh.</p><button class="btn btn-gold" onclick="goTo('summary')">Lihat Ringkasan →</button>`;
+  }
+  const q = exitQ[i];
+  return `
+    <div class="topbar"><span class="muted">Tiket Keluar ${i+1}/${exitQ.length}</span></div>
+    <div class="progressbar"><div style="width:${(i/exitQ.length)*100}%"></div></div>
+    <div class="card">
+      <p style="font-weight:600;">${q.stem}</p>
+      <div>${q.options.map((o,idx)=>`<button class="btn-option" id="optExit-${idx}" onclick="answerExit(${idx})">${o}</button>`).join("")}</div>
+      <div id="fbExit"></div>
+    </div>
+  `;
+}
+function answerExit(idx){
+  const i = state.qIndex;
+  const q = exitQ[i];
+  if(q._answered) return;
+  q._answered = true;
+  const correct = idx === q.correct;
+  q.options.forEach((o,oi)=>{
+    const btn = document.getElementById(`optExit-${oi}`);
+    btn.classList.add("disabled");
+    if(oi===q.correct) btn.classList.add("correct");
+    else if(oi===idx) btn.classList.add("wrong");
+  });
+  const fb = document.getElementById("fbExit");
+  fb.className = "feedback " + (correct ? "ok" : "no");
+  fb.innerHTML = (correct ? "✅ Betul! " : "❌ Belum tepat. ") + q.explain;
+  fb.insertAdjacentHTML("afterend", `<button class="btn btn-primary" onclick="advanceExit()">Seterusnya →</button>`);
+  logAnswer(state.exitLog, { id:q.id, question:q.stem, chosen:q.options[idx], correctAns:q.options[q.correct], correct, level:"Tiket Keluar" });
+}
+function advanceExit(){ state.qIndex++; saveState(); render(); }
+
+/* ---------- RINGKASAN ---------- */
+function allLogs(){ return [].concat(state.diagLog, state.practiceLog, state.bankLog, state.exitLog); }
+function screenSummary(){
+  const logs = allLogs();
+  const gradedLogs = [].concat(state.practiceLog, state.bankLog, state.exitLog);
+  const totalCorrect = gradedLogs.filter(l=>l.correct).length;
+  const totalQ = gradedLogs.length;
+  const pct = totalQ ? Math.round((totalCorrect/totalQ)*100) : 0;
+  let masteryLabel = "Tahap 1 — Asas";
+  if(pct>=80) masteryLabel = "Tahap 3 — Cemerlang 🏭";
+  else if(pct>=60) masteryLabel = "Tahap 2 — Baik";
+  const durationSec = state.endTime && state.startTime ? Math.round((state.endTime-state.startTime)/1000) : 0;
+  const mins = Math.floor(durationSec/60), secs = durationSec%60;
+  const listItems = logs.map(l=>{
+    return `<div class="scoreitem">
+      <div>${l.level ? `<span class="muted">[${l.level}]</span> ` : ""}${escapeHtml(l.question)}</div>
+      <div>${l.correct ? '<span class="ok-tag">✔ Betul</span>' : '<span class="no-tag">✘ Salah</span>'} — Jawapan anda: <b>${escapeHtml(l.chosen)}</b>${l.correct ? "" : ` | Jawapan betul: <b>${escapeHtml(l.correctAns)}</b>`}</div>
+    </div>`;
+  }).join("");
+  return `
+    <h2>📋 Ringkasan Kilang</h2>
+    <div class="card">
+      <p style="margin-bottom:4px;"><b>Nama:</b> ${escapeHtml(state.name)}</p>
+      <p style="margin-bottom:0;"><b>Kelas:</b> ${escapeHtml(state.kelas)}</p>
+    </div>
+    <div class="statrow">
+      <div class="statbox"><div class="num">${totalCorrect}/${totalQ}</div><div class="lbl">Markah</div></div>
+      <div class="statbox"><div class="num">${pct}%</div><div class="lbl">Peratus</div></div>
+      <div class="statbox"><div class="num">${mins}m ${secs}s</div><div class="lbl">Masa</div></div>
+    </div>
+    <div class="card" style="text-align:center;"><div class="pill" style="font-size:0.85rem;">${masteryLabel}</div></div>
+    <h3>Log Jawapan Terperinci</h3>
+    <div class="scorelist">${listItems}</div>
+    <button class="btn btn-ghost" onclick="goTo('confirmReset')">🔄 Set Semula & Cuba Lagi</button>
+    <p class="footer-note">SK 4.4 Nisbah, Kadar & Kadaran · KSSM Matematik Tingkatan 1 · ${VERSION}<br>Sila tangkap skrin ini untuk dihantar kepada guru.</p>
+  `;
+}
+
+/* ---------- RESET ---------- */
+function screenConfirmReset(){
+  return `
+    <h2>⚠️ Sahkan Set Semula</h2>
+    <div class="card"><p>Tindakan ini akan memadam semua rekod jawapan dan markah anda untuk permulaan baharu. Tindakan ini tidak boleh diundur.</p></div>
+    <button class="btn btn-primary" style="background:var(--negative);" onclick="doReset()">Ya, Padam & Mula Semula</button>
+    <button class="btn btn-ghost" onclick="goBack()">Batal, Kembali</button>
+  `;
+}
+function doReset(){ localStorage.removeItem(STORAGE_KEY); state = freshState(); render(); }
+
+/* ---------- UTIL ---------- */
+function escapeHtml(str){
+  if(str === undefined || str === null) return "";
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+/* ---------- MULA ---------- */
+render();
+</script>
+</body>
+</html>

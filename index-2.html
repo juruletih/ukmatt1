@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Matematik Tingkatan 1 — Peta Modul</title>
+<style>
+  :root{
+    --bg: #0d1117; --surface: #161b22; --surface-2: #1f2733;
+    --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+    --accent: #4ade80; --gold: #f4b942;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+    padding: 16px 14px 48px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1{ font-size: 1.4rem; margin: 8px 0 4px; text-align:center; }
+  .subtitle{ text-align:center; color: var(--muted); font-size:0.88rem; margin-bottom:20px; }
+  .searchbox{
+    width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
+    background: var(--surface); color: var(--text); font-size:1rem; margin-bottom:18px;
+  }
+  .no-result{ text-align:center; color: var(--muted); padding:20px; display:none; }
+  .bab{
+    border:1px solid var(--border); border-radius:14px; margin-bottom:10px;
+    overflow:hidden; background: var(--surface);
+  }
+  .bab > summary{
+    padding:13px 16px; font-weight:700; font-size:0.98rem; cursor:pointer;
+    list-style:none; display:flex; align-items:center; justify-content:space-between;
+    background: var(--surface-2); border-left:4px solid var(--accent);
+  }
+  .bab > summary::-webkit-details-marker{ display:none; }
+  .bab > summary::after{ content:"▸"; transition: transform 0.2s; color: var(--muted); }
+  .bab[open] > summary::after{ transform: rotate(90deg); }
+  .count-pill{
+    font-size:0.7rem; font-weight:600; color: var(--muted); background: var(--bg);
+    padding:2px 8px; border-radius:999px; margin-left:8px;
+  }
+  .sk-list{ padding: 10px 12px 12px; }
+  .sk-link{
+    display:block; padding:10px 12px; margin:6px 0; border-radius:10px;
+    background: var(--surface-2); color: var(--text); text-decoration:none;
+    font-size:0.9rem; border:1px solid var(--border);
+  }
+  .sk-link:active{ transform: scale(0.98); }
+  .sk-code{ color: var(--gold); font-weight:700; margin-right:6px; }
+  .footer-note{ text-align:center; font-size:0.75rem; color: var(--muted); margin-top:24px; }
+</style>
+</head>
+<body>
+
+<h1>📘 Matematik Tingkatan 1</h1>
+<p class="subtitle">Peta Modul Gamifikasi KSSM · 35 Modul · 13 Bab</p>
+
+<input type="text" class="searchbox" id="searchBox" placeholder="🔍 Cari bab atau SK (cth: integer, nisbah, 5.1)..." oninput="filterModules()">
+<p class="no-result" id="noResult">Tiada modul dijumpai.</p>
+
+<details class="bab" open><summary>Bab 1 — Nombor Nisbah <span class="count-pill">5 SK</span></summary><div class="sk-list">
+  <a class="sk-link" href="SK1.1_Integer_Tingkatan1.html"><span class="sk-code">1.1</span>Integer</a>
+  <a class="sk-link" href="SK1.2_OperasiIntegerAritmetik_Tingkatan1.html"><span class="sk-code">1.2</span>Operasi Integer & Hukum Aritmetik</a>
+  <a class="sk-link" href="SK1.3_PecahanPositifNegatif_Tingkatan1.html"><span class="sk-code">1.3</span>Pecahan Positif & Negatif</a>
+  <a class="sk-link" href="SK1.4_PerpuluhanPositifNegatif_Tingkatan1.html"><span class="sk-code">1.4</span>Perpuluhan Positif & Negatif</a>
+  <a class="sk-link" href="SK1.5_NomborNisbah_Tingkatan1.html"><span class="sk-code">1.5</span>Nombor Nisbah</a>
+</div></details>
+
+<details class="bab"><summary>Bab 2 — Faktor dan Gandaan <span class="count-pill">2 SK</span></summary><div class="sk-list">
+  <a class="sk-link" href="SK2.1_FaktorFaktorPerdanaFSTB_Tingkatan1.html"><span class="sk-code">2.1</span>Faktor, Faktor Perdana & FSTB</a>
+  <a class="sk-link" href="SK2.2_GandaanGSTK_Tingkatan1.html"><span class="sk-code">2.2</span>Gandaan & GSTK</a>
+</div></details>
+
+<details class="bab"><summary>Bab 3 — Kuasa Dua, Kuasa Tiga, Punca Kuasa <span class="count-pill">2 SK</span></summary><div class="sk-list">
+  <a class="sk-link" href="SK3.1_KuasaDuaPuncaKuasaDua_Tingkatan1.html"><span class="sk-code">3.1</span>Kuasa Dua & Punca Kuasa Dua</a>
+  <a class="sk-link" href="SK3.2_KuasaTigaPuncaKuasaTiga_Tingkatan1.html"><span class="sk-code">3.2</span>Kuasa Tiga & Punca Kuasa Tiga</a>
+</div></details>
+
+<details class="bab"><summary>Bab 4 — Nisbah, Kadar, Kadaran <span class="count-pill">5 SK</span></summary><div class="sk-list">
+  <a class="sk-link" href="SK4.1_Nisbah_Tingkatan1.html"><span class="sk-code">4.1</span>Nisbah</a>
+  <a class="sk-link" href="SK4.2_Kadar_Tingkatan1.html"><span class="sk-code">4.2</span>Kadar</a>
+  <a class="sk-link" href="SK4.3_Kadaran_Tingkatan1.html"><span class="sk-code">4.3</span>Kadaran</a>
+  <a class="sk-link" href="SK4.4_NisbahKadarKadaran_Tingkatan1.html"><span class="sk-code">4.4</span>Nisbah, Kadar & Kadaran</a>
+  <a class="sk-link" href="SK4.5_PerkaitanPeratusNisbah_Tingkatan1.html"><span class="sk-code">4.5</span>Perkaitan Peratus & Nisbah</a>
+</div></details>
+
+<details class="bab"><summary>Bab 5 — Ungkapan Algebra <span class="count-pill">2 SK</span></summary><div class="sk-list">
+  <a class="sk-link" href="SK5.1_PembolehUbahUngkapanAlgebra_Tingkatan1.html"><span class="sk-code">5.1</span>Pembolehubah & Ungkapan Algebra</a>
+  <a class="sk-link" href="SK5.2_OperasiUngkapanAlgebra_Tingkatan1.html"><span class="sk-code">5.2</span>Operasi Ungkapan Algebra</a>
+</div></details>
+
+<details class="bab"><summary>Bab 6 — Persamaan Linear <span class="count-pill">3 SK</span></summary><div class="sk-list">
+  <a class="sk-link" href="SK6.1_PersamaanLinearSatuPembolehUbah_Tingkatan1.html"><span class="sk-code">6.1</span>Persamaan Linear Satu Pembolehubah</a>
+  <a class="sk-link" href="SK6.2_PersamaanLinearDuaPembolehUbah_Tingkatan1.html"><span class="sk-code">6.2</span>Persamaan Linear Dua Pembolehubah</a>
+  <a class="sk-link" href="SK6.3_PersamaanLinearSerentak_Tingkatan1.html"><span class="sk-code">6.3</span>Persamaan Linear Serentak</a>
+</div></details>
+
+<details class="bab"><summary>Bab 7 — Ketaksamaan Linear <span class="count-pill">2 SK</span></summary><div class="sk-list">
+  <a class="sk-link" href="SK7.1_Ketaksamaan_Tingkatan1.html"><span class="sk-code">7.1</span>Ketaksamaan</a>
+  <a class="sk-link" href="SK7.2_KetaksamaanLinearSatuPembolehUbah_Tingkatan1.html"><span class="sk-code">7.2</span>Ketaksamaan Linear Satu Pembolehubah</a>
+</div></details>
+
+<details class="bab"><summary>Bab 8 — Garis dan Sudut <span class="count-pill">3 SK</span></summary><div class="sk-list">
+  <a class="sk-link" href="SK8.1_GarisDanSudut_Tingkatan1.html"><span class="sk-code">8.1</span>Garis dan Sudut</a>
+  <a class="sk-link" href="SK8.2_SudutGarisBersilang_Tingkatan1.html"><span class="sk-code">8.2</span>Sudut pada Garis Bersilang</a>
+  <a class="sk-link" href="SK8.3_GarisSelariRentasLintang_Tingkatan1.html"><span class="sk-code">8.3</span>Garis Selari & Rentas Lintang</a>
+</div></details>
+
+<details class="bab"><summary>Bab 9 — Poligon Asas <span class="count-pill">3 SK</span></summary><div class="sk-list">
+  <a class="sk-link" href="SK9.1_Poligon_Tingkatan1.html"><span class="sk-code">9.1</span>Poligon</a>
+  <a class="sk-link" href="SK9.2_SifatSegiTiga_Tingkatan1.html"><span class="sk-code">9.2</span>Sifat Segi Tiga</a>
+  <a class="sk-link" href="SK9.3_SifatSisiEmpat_Tingkatan1.html"><span class="sk-code">9.3</span>Sifat Sisi Empat</a>
+</div></details>
+
+<details class="bab"><summary>Bab 10 — Perimeter dan Luas <span class="count-pill">3 SK</span></summary><div class="sk-list">
+  <a class="sk-link" href="SK10.1_Perimeter_Tingkatan1.html"><span class="sk-code">10.1</span>Perimeter</a>
+  <a class="sk-link" href="SK10.2_Luas_Tingkatan1.html"><span class="sk-code">10.2</span>Luas</a>
+  <a class="sk-link" href="SK10.3_PerkaitanPerimeterLuas_Tingkatan1.html"><span class="sk-code">10.3</span>Perkaitan Perimeter & Luas</a>
+</div></details>
+
+<details class="bab"><summary>Bab 11 — Pengenalan Set <span class="count-pill">2 SK</span></summary><div class="sk-list">
+  <a class="sk-link" href="SK11.1_Set_Tingkatan1.html"><span class="sk-code">11.1</span>Set</a>
+  <a class="sk-link" href="SK11.2_GambarRajahVenn_Tingkatan1.html"><span class="sk-code">11.2</span>Gambar Rajah Venn</a>
+</div></details>
+
+<details class="bab"><summary>Bab 12 — Pengendalian Data <span class="count-pill">1 SK</span></summary><div class="sk-list">
+  <a class="sk-link" href="SK12.1_PengendalianData_Tingkatan1.html"><span class="sk-code">12.1</span>Pengendalian Data</a>
+</div></details>
+
+<details class="bab"><summary>Bab 13 — Teorem Pythagoras <span class="count-pill">2 SK</span></summary><div class="sk-list">
+  <a class="sk-link" href="SK13.1_TeoremPythagoras_Tingkatan1.html"><span class="sk-code">13.1</span>Teorem Pythagoras</a>
+  <a class="sk-link" href="SK13.2_AkasTeoremPythagoras_Tingkatan1.html"><span class="sk-code">13.2</span>Akas Teorem Pythagoras</a>
+</div></details>
+
+<p class="footer-note">Matematik Tingkatan 1 · 35 Modul Gamifikasi · KSSM/KP2027<br>Dibina oleh Cg Din</p>
+
+<script>
+function filterModules(){
+  const q = document.getElementById('searchBox').value.trim().toLowerCase();
+  const babs = document.querySelectorAll('.bab');
+  let anyVisible = false;
+
+  babs.forEach(bab => {
+    const babTitle = bab.querySelector('summary').textContent.toLowerCase();
+    const links = bab.querySelectorAll('.sk-link');
+    let babHasMatch = q === "" ? true : babTitle.includes(q);
+
+    links.forEach(link => {
+      const linkText = link.textContent.toLowerCase();
+      const matches = q === "" || linkText.includes(q) || babTitle.includes(q);
+      link.style.display = matches ? "block" : "none";
+      if(matches) babHasMatch = true;
+    });
+
+    bab.style.display = babHasMatch ? "block" : "none";
+    if(babHasMatch){
+      anyVisible = true;
+      if(q !== "") bab.setAttribute('open', '');
+    } else {
+      if(q !== "") bab.removeAttribute('open');
+    }
+  });
+
+  document.getElementById('noResult').style.display = anyVisible ? "none" : "block";
+}
+</script>
+
+</body>
+</html>
